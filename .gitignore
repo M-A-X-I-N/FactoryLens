@@ -1,0 +1,28 @@
+# FactoryLens generated analysis / scratch state
+work/
+
+# Machine-local configuration
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE/editor state
+.idea/
+.vscode/
+.vs/
+
+# Generic build/package output
+build/
+dist/
+out/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
