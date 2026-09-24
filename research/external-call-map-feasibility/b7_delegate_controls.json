@@ -1,0 +1,16 @@
+{
+  "expected_registration_count": 13,
+  "expected_unique_handlers": [
+    "ARSSImageSubsystem::OnDownloadFailed",
+    "ARSSImageSubsystem::OnDownloadSuccess",
+    "URssApiFetchDesignByIdAction::OnDesignFetched",
+    "URssApiFetchDesignByIdAction::OnError",
+    "URssApiFetchDesignLimitsAction::OnError",
+    "URssApiFetchOwnDesignsAction::OnError",
+    "URssApiFetchOwnDesignsAction::OnListFetched",
+    "URssApiFetchPublicDesignsAction::OnError",
+    "URssApiFetchPublicDesignsAction::OnListFetched",
+    "URssDownloadImage::OnCacheImageFailed",
+    "URssDownloadImage::OnCacheImageLoaded"
+  ]
+}

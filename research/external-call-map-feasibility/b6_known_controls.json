@@ -1,0 +1,64 @@
+{
+  "controls": [
+    {
+      "symbol": "ARssDataManagerSubsystem::Tick",
+      "role": "lifecycle-positive",
+      "expect_external_override": true,
+      "reason": "Known Unreal Actor tick callback used as the B4/B5 root."
+    },
+    {
+      "symbol": "ARSSImageSubsystem::BeginPlay",
+      "role": "lifecycle-positive",
+      "expect_external_override": true,
+      "reason": "Known Unreal Actor lifecycle callback."
+    },
+    {
+      "symbol": "URssSignWidget::NativeTick",
+      "role": "lifecycle-positive",
+      "expect_external_override": true,
+      "reason": "Known UUserWidget lifecycle callback used in B5."
+    },
+    {
+      "symbol": "URssWidgetRenderComponent::BeginPlay",
+      "role": "lifecycle-positive",
+      "expect_external_override": true,
+      "reason": "Known ActorComponent lifecycle callback used in B5."
+    },
+    {
+      "symbol": "FRSSModule::StartupModule",
+      "role": "lifecycle-positive",
+      "expect_external_override": true,
+      "reason": "IModuleInterface lifecycle override; B7 may later enrich its framework meaning."
+    },
+    {
+      "symbol": "ARSSBuildableSign::GetLifetimeReplicatedProps",
+      "role": "generic-override-control",
+      "expect_external_override": true,
+      "reason": "Real external override but not a useful default execution-root presentation."
+    },
+    {
+      "symbol": "ARSSSignHologram::GetRotationStep",
+      "role": "generic-override-control",
+      "expect_external_override": true,
+      "reason": "Real framework/utility override that tests candidate-set noise."
+    },
+    {
+      "symbol": "ARSSSignHologramPipeAndBelts::IsValidHitResult",
+      "role": "generic-override-control",
+      "expect_external_override": true,
+      "reason": "Real framework/utility override that should be a candidate, not silently promoted to a high-value root."
+    },
+    {
+      "symbol": "ARssDataManagerSubsystem::CheckCopy",
+      "role": "ordinary-local-negative",
+      "expect_external_override": false,
+      "reason": "Ordinary project-local method reached from Tick."
+    },
+    {
+      "symbol": "URssWidgetRenderComponent::RequestRedraw",
+      "role": "ordinary-local-negative",
+      "expect_external_override": false,
+      "reason": "Ordinary project-local method used throughout the B4/B5 graph."
+    }
+  ]
+}
