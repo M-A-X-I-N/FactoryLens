@@ -12,7 +12,7 @@ The initial FactoryLens repository bootstrap is complete. The project is moving 
 
 The completed B1-B8 External Call Map study classified the approach as **viable with known blind spots** without requiring a bespoke C++ parser or deep semantic coupling to Rider/ReSharper internals.
 
-No polished Rider plugin or supported analyzer service exists yet.
+The first supported-product contract is now defined in [`docs/MVP_CONTRACT.md`](docs/MVP_CONTRACT.md). No polished Rider plugin or supported analyzer service exists yet.
 
 ## Initial product direction
 

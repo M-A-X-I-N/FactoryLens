@@ -60,8 +60,8 @@ This task is deliberately **non-blocking** for product development.
 
 | ID | Status | Task | Done when |
 | --- | --- | --- | --- |
-| **FL-A010** | **NEXT** | Define the first supported-product/MVP contract. | A short durable document defines the exact first Rider workflow, supported evidence types, required user-visible behavior, and explicit non-goals using the working-product gate above. |
-| **FL-A020** | **READY** | Determine the Rider/analyzer implementation boundary. | Evidence-backed decision chooses the initial Rider plugin technology, analyzer implementation/runtime strategy, process boundary, and how Rider communicates with the semantic service. The choice must optimize for getting a real Satisfactory workflow working, not abstract purity. |
+| **FL-A010** | **DONE** | Define the first supported-product/MVP contract. | [`docs/MVP_CONTRACT.md`](docs/MVP_CONTRACT.md) defines the exact first Rider workflow, supported evidence types, required user-visible behavior, validation specimens, and explicit non-goals. |
+| **FL-A020** | **NEXT** | Determine the Rider/analyzer implementation boundary. | Evidence-backed decision chooses the initial Rider plugin technology, analyzer implementation/runtime strategy, process boundary, and how Rider communicates with the semantic service. The choice must optimize for getting a real Satisfactory workflow working, not abstract purity. |
 | **FL-A030** | **READY** | Establish the production source/build layout. | Supported source lives outside `research/`; the chosen plugin/analyzer projects build in CI; repository layout and canonical build/test commands are documented. |
 | **FL-A040** | **READY** | Define the supported analyzer protocol/domain model. | Stable product-facing types exist for symbols, source locations, roots, call edges, graph nodes, evidence/provenance, errors, and progress without leaking raw clangd LSP structures through every layer. |
 
