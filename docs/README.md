@@ -1,6 +1,6 @@
 # 1. FactoryLens documentation
 
-This directory contains durable product, architecture, environment, and supported-behavior documentation.
+This directory contains durable product, architecture, environment, and supported-behavior documentation. Global task status lives in [`../TASKS.md`](../TASKS.md).
 
 Experimental evidence belongs under [`../research/`](../research/), not here.
 

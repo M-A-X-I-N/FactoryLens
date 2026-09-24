@@ -10,7 +10,7 @@ For repository-changing work:
 4. commit/push meaningful completed work promptly;
 5. inspect CI when the changed surface is covered.
 
-Task sequencing belongs in chat, not in a repository TODO ledger.
+`../TASKS.md` is the canonical global roadmap/task ledger. Keep durable global status there. Chat may decompose the current global task into temporary minitasks, but do not create competing task ledgers elsewhere in the repository.
 
 ## 1.2 Interrupted-session recovery
 

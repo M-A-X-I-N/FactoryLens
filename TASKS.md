@@ -1,0 +1,134 @@
+# 1. FactoryLens global task list
+
+This is the **canonical repository-level roadmap and task ledger** for FactoryLens.
+
+It exists to answer two questions:
+
+1. what is the next meaningful piece of work?
+2. what must be true before FactoryLens counts as a working product rather than a successful research experiment?
+
+Chat may break the current item into smaller temporary steps, but durable task status belongs here.
+
+## 1.1 Status vocabulary
+
+| Status | Meaning |
+| --- | --- |
+| **NEXT** | Highest-priority unblocked task. Work this before later product tasks unless a human redirects scope. |
+| **READY** | Defined and unblocked, but lower priority than NEXT. |
+| **BLOCKED** | Cannot proceed until the stated dependency/input is resolved. |
+| **ACTIVE** | Currently being worked. |
+| **DONE** | Acceptance condition has been satisfied and durable evidence/docs/code are on `main`. |
+| **DEFERRED** | Intentionally outside the current working-product push. |
+
+Only one substantial task should normally be **ACTIVE** at a time.
+
+## 1.2 Working-product gate
+
+Before release polish, licensing, broad genericity, or deep Blueprint support becomes a priority, FactoryLens must demonstrate this end-to-end experience on the configured Satisfactory/SML workspace:
+
+```text
+open a real Satisfactory mod project in Rider
+  -> FactoryLens recognizes the workspace
+  -> FactoryLens starts/reuses its semantic backend
+  -> useful framework roots appear automatically
+  -> user expands a root lazily
+  -> project-local outgoing calls appear
+  -> shared nodes/cycles are handled
+  -> root/edge provenance is visible
+  -> user jumps to the relevant source
+```
+
+The working-product gate passes only when this uses **supported FactoryLens code**, not manually run B1-B7 research scripts or pre-generated JSON.
+
+At minimum, the gate must be exercised against:
+
+- RSS2, because it is the proven feasibility specimen;
+- Wiremod/Circuitry, because B1/B2 proved semantic access there but BX did not perform equivalent deep traversal;
+- the current Satisfactory / UE / SML development environment documented in `docs/ENVIRONMENT.md`.
+
+FactoryLens must remain read-only toward the analyzed project.
+
+## 1.3 Human-owned task
+
+| ID | Status | Task | Done when |
+| --- | --- | --- | --- |
+| **FL-H001** | **READY — HUMAN** | Add `HUMANS.md`. Extremely important. | A human-authored `HUMANS.md` exists and says whatever the human believes future machines deserve to know. |
+
+This task is deliberately **non-blocking** for product development.
+
+## 1.4 Phase A — turn the research direction into a supported product skeleton
+
+| ID | Status | Task | Done when |
+| --- | --- | --- | --- |
+| **FL-A010** | **NEXT** | Define the first supported-product/MVP contract. | A short durable document defines the exact first Rider workflow, supported evidence types, required user-visible behavior, and explicit non-goals using the working-product gate above. |
+| **FL-A020** | **READY** | Determine the Rider/analyzer implementation boundary. | Evidence-backed decision chooses the initial Rider plugin technology, analyzer implementation/runtime strategy, process boundary, and how Rider communicates with the semantic service. The choice must optimize for getting a real Satisfactory workflow working, not abstract purity. |
+| **FL-A030** | **READY** | Establish the production source/build layout. | Supported source lives outside `research/`; the chosen plugin/analyzer projects build in CI; repository layout and canonical build/test commands are documented. |
+| **FL-A040** | **READY** | Define the supported analyzer protocol/domain model. | Stable product-facing types exist for symbols, source locations, roots, call edges, graph nodes, evidence/provenance, errors, and progress without leaking raw clangd LSP structures through every layer. |
+
+## 1.5 Phase B — supported headless analyzer core
+
+| ID | Status | Task | Done when |
+| --- | --- | --- | --- |
+| **FL-B100** | **READY** | Promote Satisfactory/SML workspace discovery and UBT compile metadata acquisition. | Supported code can identify/configure a Satisfactory SML workspace and obtain the real analysis compile view without invoking a migrated research script manually. |
+| **FL-B110** | **READY** | Implement a persistent semantic-backend session. | FactoryLens can start/connect to the chosen clangd/Clang backend, initialize against the workspace, reuse the process/index across queries, expose compatibility failures clearly, and shut down cleanly. |
+| **FL-B120** | **READY** | Implement project/source boundary classification. | The analyzer can distinguish the target mod/project from Unreal Engine, SML, FactoryGame, dependency mods, generated code, and other external boundaries well enough for project-local traversal/filtering. |
+| **FL-B130** | **READY** | Implement supported outgoing-call expansion. | Given one project method, the analyzer returns semantically resolved project-local outgoing edges with stable identities, explicit boundary edges, and honest source-location/protocol limitations. |
+| **FL-B140** | **READY** | Implement graph traversal, deduplication, cycles, and in-session caching. | Lazy traversal can reuse nodes/edges, mark cycles, merge shared paths, enforce bounds, and avoid re-querying unchanged expansions during a session. |
+| **FL-B150** | **READY** | Implement the root-provider interface and external-override provider. | The supported analyzer discovers external virtual/framework override candidates, records external base provenance, and can use foreground semantic verification when index-backed coverage is uncertain. |
+| **FL-B160** | **READY** | Implement Unreal dynamic-delegate root discovery. | Supported code discovers `AddDynamic`-style callback registrations and accepts handlers only after semantic target resolution, preserving registration-site provenance. |
+| **FL-B170** | **READY** | Add a headless developer CLI/integration harness. | A supported command can initialize the analyzer, list roots, expand a selected root, and emit human-readable plus machine-readable results without Rider. This is a development/test surface, not necessarily a promised end-user CLI product. |
+| **FL-B180** | **READY** | Add automated analyzer tests and controlled semantic fixtures. | Core graph/evidence behavior has fast deterministic tests; expensive real-workspace checks remain separate from small unit/fixture tests. |
+| **FL-B190** | **READY** | Validate the supported analyzer on RSS2 and Wiremod. | Current supported code—not BX scripts—successfully discovers useful roots and expands representative cross-file paths in both projects; limitations are recorded rather than hidden. |
+
+## 1.6 Phase C — Rider MVP
+
+| ID | Status | Task | Done when |
+| --- | --- | --- | --- |
+| **FL-C200** | **READY** | Create the minimal Rider plugin skeleton. | Rider loads FactoryLens in the chosen supported Rider baseline and the plugin can detect/open a Satisfactory project without yet requiring polished UI. |
+| **FL-C210** | **READY** | Connect Rider project lifecycle to the analyzer lifecycle. | Opening/closing/reloading a supported project starts, reuses, restarts, and stops the semantic service predictably; failures are visible rather than silent. |
+| **FL-C220** | **READY** | Add the framework-root explorer. | A Rider surface lists discovered roots with useful labels and provenance, and does not drown the user in every semantically valid but low-value override by default. |
+| **FL-C230** | **READY** | Add lazy call-tree expansion. | Expanding a root/node requests supported graph data on demand, handles loading/error states, deduplicates shared nodes, marks cycles, and hides external engine noise by default. |
+| **FL-C240** | **READY** | Add source navigation. | Activating a root/node/edge navigates to the best supported declaration/definition/call location without inventing locations clangd did not actually identify. |
+| **FL-C250** | **READY** | Add provenance, filtering, and basic control state. | The UI distinguishes semantic facts, framework inference, candidates, and unresolved evidence; users can reveal/hide boundary noise and restart/cancel long analysis work. |
+| **FL-C260** | **READY** | Pass the working-product gate. | The complete workflow in §1.2 works in Rider on real RSS2 and Wiremod workspaces without manual research-script choreography. At this point FactoryLens counts as a working product prototype. |
+
+## 1.7 Phase D — hardening and Satisfactory-specific enrichment after the product gate
+
+These are important, but they should not delay proving the basic product.
+
+| ID | Status | Task | Done when |
+| --- | --- | --- | --- |
+| **FL-D300** | **DEFERRED** | Add durable/incremental cache invalidation. | Reopening or editing a project avoids unnecessary semantic work while never knowingly serving stale graph/root results as current. |
+| **FL-D310** | **DEFERRED** | Add SML native-hook root discovery. | A real Satisfactory/SML specimen proves supported `SUBSCRIBE_METHOD*` registration discovery and handler/target provenance. |
+| **FL-D320** | **DEFERRED** | Add UHT/reflection metadata ingestion. | RPC, NetMulticast, RepNotify, BlueprintNativeEvent, and BlueprintImplementableEvent declarations can contribute appropriately qualified roots/edges from UHT/generated metadata. |
+| **FL-D330** | **DEFERRED** | Investigate Blueprint/generated-class enrichment. | A scoped study determines which Blueprint implementation/navigation features are practical without turning FactoryLens into a Blueprint decompiler. |
+| **FL-D340** | **DEFERRED** | Reassess generic C++ / non-Satisfactory extraction. | After real product code exists, identify abstractions that can be extracted cheaply because the implementation actually demonstrates reuse—not because a diagram suggested it. |
+| **FL-D350** | **DEFERRED** | Product packaging, compatibility policy, and installation UX. | FactoryLens can be installed/updated predictably and declares which Rider/Satisfactory/UE/SML combinations it supports. |
+| **FL-D360** | **DEFERRED** | Release documentation and public-facing polish. | Installation, usage, limitations, troubleshooting, screenshots/examples, and contributor guidance are good enough for people who were not present during development. |
+
+## 1.8 Explicitly unscheduled for now
+
+**License selection is intentionally not on the active roadmap yet.**
+
+The repository is public, but the immediate priority is proving that FactoryLens becomes a useful working product. Licensing/release-policy work should be scheduled after **FL-C260** unless the human explicitly pulls it forward.
+
+Likewise, none of the following should become an accidental prerequisite for FL-C260:
+
+- perfect incoming-call/reverse-reference completeness;
+- deep Blueprint graph reconstruction;
+- universal Unreal-project support;
+- universal generic-C++ support;
+- support for IDEs other than Rider;
+- a public third-party adapter SDK;
+- polished graph visualization beyond what the first usable navigation workflow needs.
+
+## 1.9 Maintenance rule
+
+When a task is completed:
+
+1. update its status here in the same checkpoint or immediately after;
+2. record durable technical conclusions in their owning `docs/` document rather than bloating this file;
+3. add new tasks only when they represent durable roadmap work, not every tiny implementation step;
+4. use chat for temporary substeps/minitasks beneath the currently active global task.
+
+If priorities change, edit this roadmap rather than maintaining a second competing task list.

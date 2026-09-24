@@ -38,7 +38,7 @@ UnrealBuildTool compile truth
 
 Rider is the intended first-class user experience, but the semantic/graph core should remain usable outside Rider when doing so is cheap.
 
-See [`docs/README.md`](docs/README.md) for durable project documentation.
+See [`TASKS.md`](TASKS.md) for the global roadmap and [`docs/README.md`](docs/README.md) for durable project documentation.
 
 ## Proven so far
 

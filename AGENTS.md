@@ -9,8 +9,9 @@ Read, in order:
 1. this file;
 2. `.agents/README.md` and `.agents/WORKFLOW.md`;
 3. the root `README.md`;
-4. `docs/README.md`;
-5. only the research material relevant to the task.
+4. `TASKS.md` for global priorities/status;
+5. `docs/README.md`;
+6. only the research material relevant to the task.
 
 Treat current repository state as authoritative over remembered chat context.
 
@@ -20,7 +21,7 @@ Treat current repository state as authoritative over remembered chat context.
 - `research/` owns experiments, evidence, feasibility studies, and historical probes.
 - generated compile databases, clangd indexes, logs, graph output, caches, and scratch state belong under ignored `work/`;
 - machine-local paths belong in ignored `.env`;
-- do not create a repository-local TODO/task ledger.
+- `TASKS.md` is the canonical repository-level roadmap/task ledger. Do not create competing TODO/task ledgers elsewhere; use chat for temporary substeps beneath the active global task.
 
 Supported product code should eventually live outside `research/`; promotion from a research probe is an explicit decision.
 

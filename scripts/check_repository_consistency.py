@@ -9,6 +9,7 @@ import subprocess
 REQUIRED_PATHS = (
     Path("README.md"),
     Path("AGENTS.md"),
+    Path("TASKS.md"),
     Path(".agents/README.md"),
     Path(".agents/WORKFLOW.md"),
     Path("docs/README.md"),
@@ -24,7 +25,6 @@ REQUIRED_PATHS = (
 
 FORBIDDEN_TASK_LEDGERS = (
     Path("TODO.md"),
-    Path("TASKS.md"),
     Path("docs/TODO.md"),
     Path("docs/TASKS.md"),
 )
