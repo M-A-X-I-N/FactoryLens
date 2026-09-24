@@ -157,8 +157,9 @@ public class UbtCompileMetadataGenerator(
         arguments: List<String>,
     ): List<String> {
         val comspec = environment["COMSPEC"]?.takeIf { it.isNotBlank() } ?: "cmd.exe"
-        val commandText = (listOf(batchFile.toString()) + arguments)
+        val quotedCommand = (listOf(batchFile.toString()) + arguments)
             .joinToString(" ") { quoteForCmd(it) }
+        val commandText = "\"" + quotedCommand + "\""
 
         return listOf(
             comspec,
