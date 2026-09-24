@@ -27,13 +27,16 @@ Copy:
 
 The real `.env` is ignored.
 
-Current key:
+Current keys:
 
 ```text
 SML_PROJECT_ROOT=
+FACTORYLENS_ENGINE_ROOT=
 ```
 
-It should point to the SML Starter Project root containing `FactoryGame.uproject`.
+`SML_PROJECT_ROOT` should point to the SML Starter Project root containing `FactoryGame.uproject`.
+
+`FACTORYLENS_ENGINE_ROOT` is optional. On Windows, supported workspace code otherwise resolves the `FactoryGame.uproject` `EngineAssociation` through the per-user Unreal Engine registry.
 
 The migrated B1-B7 research probes use this path to access the real Unreal/SML workspace. Generated compile databases, clangd indexes, logs, and graph output belong under ignored `work/`.
 

@@ -15,3 +15,4 @@ pluginManagement {
 include(":core")
 include(":semantic-clangd")
 include(":cli")
+include(":workspace-satisfactory")

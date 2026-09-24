@@ -22,6 +22,7 @@ subprojects {
 dependencies {
     implementation(project(":core"))
     implementation(project(":semantic-clangd"))
+    implementation(project(":workspace-satisfactory"))
 
     // Rider supplies Kotlin stdlib. Do not bundle another copy into the plugin.
     compileOnly(kotlin("stdlib"))

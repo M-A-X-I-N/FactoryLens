@@ -41,13 +41,15 @@ FactoryLens/
 │  └─ src/main/kotlin/              IDE-independent FactoryLens domain/graph core
 ├─ semantic-clangd/
 │  └─ src/main/kotlin/              IDE-independent clangd semantic adapter
+├─ workspace-satisfactory/
+│  └─ src/main/kotlin/              SML workspace / Unreal Engine / UBT compile-metadata adapter
 └─ cli/
    └─ src/main/kotlin/              headless developer/integration harness
 ```
 
-The root Rider plugin depends on `core` and `semantic-clangd`.
+The root Rider plugin depends on `core`, `semantic-clangd`, and `workspace-satisfactory`.
 
-The CLI depends on the same IDE-independent modules and therefore provides a path for testing analyzer behavior without starting Rider.
+The CLI depends on the same IDE-independent modules and therefore provides a path for testing analyzer/workspace behavior without starting Rider.
 
 The architecture rule is more important than module count:
 
