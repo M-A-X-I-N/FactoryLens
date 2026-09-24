@@ -2,6 +2,8 @@
 
 This document defines the canonical development/build commands for the supported FactoryLens product skeleton.
 
+**FL-A030 validation:** the initial skeleton was verified on 2026-09-24 with successful Windows and Ubuntu analyzer-module builds plus successful Rider 2026.2.2 plugin packaging and `verifyPluginProjectConfiguration` on Ubuntu.
+
 Research probes under `research/` keep their own experiment-specific commands and are not part of the supported Gradle product build.
 
 ## 1.1 Pinned toolchain
