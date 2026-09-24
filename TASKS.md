@@ -63,13 +63,13 @@ This task is deliberately **non-blocking** for product development.
 | **FL-A010** | **DONE** | Define the first supported-product/MVP contract. | [`docs/MVP_CONTRACT.md`](docs/MVP_CONTRACT.md) defines the exact first Rider workflow, supported evidence types, required user-visible behavior, validation specimens, and explicit non-goals. |
 | **FL-A020** | **DONE** | Determine the Rider/analyzer implementation boundary. | [`docs/IMPLEMENTATION_BOUNDARY.md`](docs/IMPLEMENTATION_BOUNDARY.md) chooses a Kotlin/JVM Rider frontend plus reusable Kotlin/JVM analyzer core, persistent external clangd, no FactoryLens daemon, and no ReSharper backend for the MVP. |
 | **FL-A030** | **DONE** | Establish the production source/build layout. | [`docs/BUILDING.md`](docs/BUILDING.md) records the Gradle/Kotlin/Rider layout and commands; `core`, `semantic-clangd`, and `cli` build on Windows/Linux CI, and the Rider 2026.2.2 plugin packages/verifies successfully. |
-| **FL-A040** | **NEXT** | Define the supported analyzer protocol/domain model. | Stable product-facing types exist for symbols, source locations, roots, call edges, graph nodes, evidence/provenance, errors, and progress without leaking raw clangd LSP structures through every layer. |
+| **FL-A040** | **DONE** | Define the supported analyzer protocol/domain model. | [`docs/ANALYZER_MODEL.md`](docs/ANALYZER_MODEL.md) and the Kotlin types under `core/.../api` + `core/.../model` define stable IDE-independent symbols, source locations, roots, calls, graph nodes, evidence/provenance, errors, state/progress, and analyzer-session operations without exposing raw clangd/LSP types. |
 
 ## 1.5 Phase B — supported headless analyzer core
 
 | ID | Status | Task | Done when |
 | --- | --- | --- | --- |
-| **FL-B100** | **READY** | Promote Satisfactory/SML workspace discovery and UBT compile metadata acquisition. | Supported code can identify/configure a Satisfactory SML workspace and obtain the real analysis compile view without invoking a migrated research script manually. |
+| **FL-B100** | **NEXT** | Promote Satisfactory/SML workspace discovery and UBT compile metadata acquisition. | Supported code can identify/configure a Satisfactory SML workspace and obtain the real analysis compile view without invoking a migrated research script manually. |
 | **FL-B110** | **READY** | Implement a persistent semantic-backend session. | FactoryLens can start/connect to the chosen clangd/Clang backend, initialize against the workspace, reuse the process/index across queries, expose compatibility failures clearly, and shut down cleanly. |
 | **FL-B120** | **READY** | Implement project/source boundary classification. | The analyzer can distinguish the target mod/project from Unreal Engine, SML, FactoryGame, dependency mods, generated code, and other external boundaries well enough for project-local traversal/filtering. |
 | **FL-B130** | **READY** | Implement supported outgoing-call expansion. | Given one project method, the analyzer returns semantically resolved project-local outgoing edges with stable identities, explicit boundary edges, and honest source-location/protocol limitations. |

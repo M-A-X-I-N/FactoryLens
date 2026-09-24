@@ -16,6 +16,7 @@ REQUIRED_PATHS = (
     Path("docs/PRODUCT_SCOPE.md"),
     Path("docs/MVP_CONTRACT.md"),
     Path("docs/IMPLEMENTATION_BOUNDARY.md"),
+    Path("docs/ANALYZER_MODEL.md"),
     Path("docs/ENVIRONMENT.md"),
     Path("docs/ARCHITECTURE.md"),
     Path("docs/BUILDING.md"),

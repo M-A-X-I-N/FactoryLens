@@ -8,6 +8,7 @@ Experimental evidence belongs under [`../research/`](../research/), not here.
 
 - [`MVP_CONTRACT.md`](MVP_CONTRACT.md) — exact first working-product workflow, required evidence/behavior, validation specimens, and explicit non-goals.
 - [`IMPLEMENTATION_BOUNDARY.md`](IMPLEMENTATION_BOUNDARY.md) — initial Rider/Kotlin/analyzer/process boundary and why no ReSharper backend or FactoryLens daemon is needed for the MVP.
+- [`ANALYZER_MODEL.md`](ANALYZER_MODEL.md) — supported IDE-independent analyzer protocol/domain model for symbols, roots, calls, evidence, state, errors, progress, and source navigation.
 - [`PRODUCT_SCOPE.md`](PRODUCT_SCOPE.md) — what FactoryLens is for and how far generalization should go.
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — current architectural direction derived from the completed feasibility work.
 - [`ENVIRONMENT.md`](ENVIRONMENT.md) — current development-environment assumptions and machine-local configuration.

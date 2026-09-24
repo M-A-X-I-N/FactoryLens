@@ -271,11 +271,10 @@ Deep Blueprint graph reconstruction, universal C++ framework analysis, perfect r
 FL-A020 resolved the implementation language/process questions for the MVP. The following remain open:
 
 - exact Gradle/module/source layout and pinned dependency versions;
-- exact product-facing analyzer/domain interfaces;
 - exact clangd LSP client/transport implementation;
 - cache persistence format/location;
 - packaging/updating strategy;
 - exact UHT metadata ingestion route;
 - public extension API for third-party framework adapters.
 
-Choose these through focused implementation/design tasks rather than guessing them into the repository bootstrap.
+FL-A040 establishes the initial product-facing analyzer/domain contract in [`ANALYZER_MODEL.md`](ANALYZER_MODEL.md). Choose the remaining items through focused implementation/design tasks rather than guessing them into the repository bootstrap.

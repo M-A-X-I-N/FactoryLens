@@ -8,7 +8,7 @@ The project is intentionally Satisfactory-first. Reusable C++/Unreal pieces are 
 
 ## Current status
 
-The initial FactoryLens repository bootstrap is complete. The project is moving from completed feasibility research into product architecture/tooling design.
+The initial FactoryLens repository bootstrap and Phase A product-definition work are complete. The project is moving into the supported headless analyzer implementation phase.
 
 The completed B1-B8 External Call Map study classified the approach as **viable with known blind spots** without requiring a bespoke C++ parser or deep semantic coupling to Rider/ReSharper internals.
 
