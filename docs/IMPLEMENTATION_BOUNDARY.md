@@ -41,7 +41,7 @@ Initial development/support line:
 Rider 2026.2
 ```
 
-The production build setup in FL-A030 should initially pin the current stable patch line, **Rider 2026.2.2*, for repeatable development/CI sandboxing unless that exact build exposes an implementation blocker.
+The production build setup in FL-A030 should initially pin the current stable patch line, **Rider 2026.2.2**, for repeatable development/CI sandboxing unless that exact build exposes an implementation blocker.
 
 Compatibility with Rider 2026.3 EAP is not an MVP requirement.
 
@@ -155,7 +155,7 @@ UBT is an **on-demand external tool**, not a persistent FactoryLens backend.
 
 FactoryLens invokes or consumes UBT compile metadata only as required by the supported workspace provider.
 
-FL-B100 must reconcile the exact acquisition method with the MVP one-mode read-only contract. If a candidate UBT path mutates the analyzed Starter Project merely to generate FactoryLens metadata, it must not be silently accepted as compliant.
+FL-B100 must reconcile the exact acquisition method with the MVP read-only contract. If a candidate UBT path mutates the analyzed Starter Project merely to generate FactoryLens metadata, it must not be silently accepted as compliant.
 
 ## 1.6 No FactoryLens daemon for the MVP
 
