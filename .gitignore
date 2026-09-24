@@ -4,6 +4,10 @@ work/
 # Machine-local configuration
 .env
 
+# Gradle / Kotlin
+.gradle/
+.kotlin/
+
 # Python
 __pycache__/
 *.py[cod]

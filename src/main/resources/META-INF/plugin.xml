@@ -1,0 +1,17 @@
+<idea-plugin>
+    <id>dev.maxin.factorylens</id>
+    <name>FactoryLens</name>
+    <vendor url="https://github.com/M-A-X-I-N/FactoryLens">M-A-X-I-N</vendor>
+
+    <description><![CDATA[
+        <p>Satisfactory-first developer tooling for Rider.</p>
+        <p>
+            FactoryLens is currently building toward a framework-aware call map
+            for understanding where execution enters a Satisfactory mod and what
+            project-local code can be reached from those entry points.
+        </p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.rider</depends>
+</idea-plugin>
