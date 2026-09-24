@@ -62,7 +62,7 @@ This task is deliberately **non-blocking** for product development.
 | --- | --- | --- | --- |
 | **FL-A010** | **DONE** | Define the first supported-product/MVP contract. | [`docs/MVP_CONTRACT.md`](docs/MVP_CONTRACT.md) defines the exact first Rider workflow, supported evidence types, required user-visible behavior, validation specimens, and explicit non-goals. |
 | **FL-A020** | **DONE** | Determine the Rider/analyzer implementation boundary. | [`docs/IMPLEMENTATION_BOUNDARY.md`](docs/IMPLEMENTATION_BOUNDARY.md) chooses a Kotlin/JVM Rider frontend plus reusable Kotlin/JVM analyzer core, persistent external clangd, no FactoryLens daemon, and no ReSharper backend for the MVP. |
-| **FL-A030** | **NEXT** | Establish the production source/build layout. | Supported source lives outside `research/`; the chosen plugin/analyzer projects build in CI; repository layout and canonical build/test commands are documented. |
+| **FL-A030** | **ACTIVE** | Establish the production source/build layout. | Supported source lives outside `research/`; the chosen plugin/analyzer projects build in CI; repository layout and canonical build/test commands are documented. |
 | **FL-A040** | **READY** | Define the supported analyzer protocol/domain model. | Stable product-facing types exist for symbols, source locations, roots, call edges, graph nodes, evidence/provenance, errors, and progress without leaking raw clangd LSP structures through every layer. |
 
 ## 1.5 Phase B — supported headless analyzer core

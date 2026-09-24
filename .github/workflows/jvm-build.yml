@@ -1,0 +1,46 @@
+name: JVM product build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  analyzer-build:
+    name: analyzer-build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build IDE-independent modules
+        shell: bash
+        run: ./gradlew :core:build :semantic-clangd:build :cli:build :cli:installDist --stacktrace
+
+  rider-plugin-build:
+    name: rider-plugin-build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build Rider plugin
+        run: ./gradlew buildPlugin verifyPluginProjectConfiguration --stacktrace

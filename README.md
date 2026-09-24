@@ -53,12 +53,16 @@ The complete evidence trail lives under [`research/external-call-map-feasibility
 ```text
 FactoryLens/
 ├─ AGENTS.md
-├─ .agents/
+├─ TASKS.md
+├─ src/                    Rider plugin frontend shell
+├─ core/                   IDE-independent product core
+├─ semantic-clangd/        clangd semantic adapter
+├─ cli/                    headless developer harness
 ├─ docs/
 ├─ research/
 ├─ scripts/
 ├─ tests/
-└─ work/        # ignored generated analysis/scratch state
+└─ work/                   ignored generated analysis/scratch state
 ```
 
 ## Development principle

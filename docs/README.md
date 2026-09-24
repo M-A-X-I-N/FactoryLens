@@ -11,6 +11,7 @@ Experimental evidence belongs under [`../research/`](../research/), not here.
 - [`PRODUCT_SCOPE.md`](PRODUCT_SCOPE.md) — what FactoryLens is for and how far generalization should go.
 - [`ARCHITECTURE.md`](ARCHITECTURE.md) — current architectural direction derived from the completed feasibility work.
 - [`ENVIRONMENT.md`](ENVIRONMENT.md) — current development-environment assumptions and machine-local configuration.
+- [`BUILDING.md`](BUILDING.md) — pinned JVM/Rider/Gradle toolchain, production module layout, canonical build commands, and CI contract.
 
 ## 1.2 Evidence versus product guarantees
 

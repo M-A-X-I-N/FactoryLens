@@ -53,13 +53,29 @@ FL-A020 selects the stable Rider 2026.2 line as the initial MVP target. FL-A030 
 
 FactoryLens will use a Kotlin/JVM IntelliJ Platform plugin frontend plus IDE-independent Kotlin/JVM analyzer modules. No ReSharper/.NET backend plugin or separate FactoryLens analyzer daemon is planned for the MVP.
 
-## 1.5 Repository validation
+## 1.5 Production build toolchain
+
+FL-A030 establishes the initial supported product build with:
+
+```text
+Rider target:                    2026.2.2
+Java toolchain:                  25
+Kotlin:                          2.4.0
+Gradle wrapper:                  9.5.0
+IntelliJ Platform Gradle plugin: 2.19.0
+```
+
+See [`BUILDING.md`](BUILDING.md) for canonical build commands.
+
+## 1.6 Repository validation
 
 Run:
 
 ```text
 python scripts/check_repository_consistency.py
 python -m unittest discover -s tests -v
+./gradlew check
+./gradlew buildPlugin verifyPluginProjectConfiguration
 ```
 
 CI runs the same repository checks on Windows and Ubuntu and compiles tracked Python sources for syntax validation.
