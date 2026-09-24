@@ -18,7 +18,11 @@ Key proven areas include UBT compile metadata, clangd/Clang semantic resolution,
 
 The study originated in `M-A-X-I-N/satisfactory-wiremod-rss-integration` and was migrated after B8 completed.
 
-## 1.2 Research rules
+## 1.2 Supporting research references
+
+- [`satisfactory-entry-points/`](satisfactory-entry-points/) — reusable model of Unreal/SML external entry mechanisms such as lifecycle callbacks, delegates, hooks, reflection/network callbacks, and data-driven registration. Derived from the source integration project's entry-point guide during migration.
+
+## 1.3 Research rules
 
 - Preserve measured limitations and failed experiments.
 - Keep generated indexes/logs/output under ignored `work/`.
