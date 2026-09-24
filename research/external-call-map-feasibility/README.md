@@ -2,6 +2,8 @@
 
 Status: **completed**. Migrated from `M-A-X-I-N/satisfactory-wiremod-rss-integration` at source commit `8d0ee54f80a9123142cba13f00a175be1161244f` on 2026-09-24.
 
+> **Historical feasibility evidence:** the scripts and B1-B8 narrative below preserve the environment-specific research that justified FactoryLens. They are not supported product code. Generated `work/external-call-map/` artifacts were intentionally not migrated. Environment assumptions in this document describe the source Satisfactory/SML workspace used for the experiment, not a permanent FactoryLens compatibility contract.
+
 This experiment asks whether the existing Satisfactory/Unreal/SML development machinery can support a **project-wide rooted call map** for code-reading and source archaeology.
 
 The desired developer experience is roughly:
