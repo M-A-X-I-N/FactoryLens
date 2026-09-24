@@ -1,0 +1,15 @@
+{
+  "roots": [
+    {
+      "id": "rss-data-manager-tick",
+      "symbol": "ARssDataManagerSubsystem::Tick",
+      "source": "Mods/GameFeatures/RSS/Source/RSS/Private/Subsystem/RSSDataManagerSubsystem.cpp",
+      "needle": "void ARssDataManagerSubsystem::Tick(float DeltaSeconds)",
+      "symbol_token": "Tick",
+      "framework_entry_kind": "Unreal Actor tick override",
+      "external_owner": "Unreal Actor lifecycle",
+      "confidence": "manual-confirmed",
+      "evidence": "RSSDataManagerSubsystem.h declares virtual void Tick(float DeltaSeconds) override, and the constructor sets PrimaryActorTick.bCanEverTick = true; Unreal owns Actor ticking."
+    }
+  ]
+}

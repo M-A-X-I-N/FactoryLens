@@ -1,0 +1,85 @@
+{
+  "roots": [
+    {
+      "id": "rss-data-manager-tick",
+      "symbol": "ARssDataManagerSubsystem::Tick",
+      "source": "Mods/GameFeatures/RSS/Source/RSS/Private/Subsystem/RSSDataManagerSubsystem.cpp",
+      "needle": "void ARssDataManagerSubsystem::Tick(float DeltaSeconds)",
+      "symbol_token": "Tick",
+      "framework_entry_kind": "Unreal Actor tick override",
+      "external_owner": "Unreal Actor lifecycle",
+      "confidence": "manual-confirmed",
+      "evidence": "RSSDataManagerSubsystem.h declares virtual void Tick(float DeltaSeconds) override, and the constructor sets PrimaryActorTick.bCanEverTick = true.",
+      "expected_direct_project_callees_smoke": [
+        "CheckKeys",
+        "UpdateVisibleComponentsAsync",
+        "ProcessPendingComponentRequests",
+        "TickAllActiveComponents",
+        "LogPoolStats",
+        "CheckCopy"
+      ]
+    },
+    {
+      "id": "rss-image-subsystem-tick",
+      "symbol": "ARSSImageSubsystem::Tick",
+      "source": "Mods/GameFeatures/RSS/Source/RSS/Private/Subsystem/RSSImageSubsystem.cpp",
+      "needle": "void ARSSImageSubsystem::Tick(float DeltaSeconds)",
+      "symbol_token": "Tick",
+      "framework_entry_kind": "Unreal Actor tick override",
+      "external_owner": "Unreal Actor lifecycle",
+      "confidence": "manual-confirmed",
+      "evidence": "RSSImageSubsystem.h declares virtual void Tick(float DeltaSeconds) override, and the constructor sets PrimaryActorTick.bCanEverTick = true.",
+      "expected_direct_project_callees_smoke": [
+        "GenerateInformation",
+        "CustomDataToJson",
+        "GetFilePath",
+        "IsUrlValid",
+        "GetDataFromUrl",
+        "SendRequestBack"
+      ]
+    },
+    {
+      "id": "rss-sign-gun-tick",
+      "symbol": "ARssSignGun::Tick",
+      "source": "Mods/GameFeatures/RSS/Source/RSS/Private/Equipment/RssSignGun.cpp",
+      "needle": "void ARssSignGun::Tick(float DeltaSeconds)",
+      "symbol_token": "Tick",
+      "framework_entry_kind": "Unreal Actor tick override",
+      "external_owner": "Unreal Actor lifecycle",
+      "confidence": "manual-confirmed",
+      "evidence": "RssSignGun.h declares virtual void Tick(float DeltaSeconds) override, and the constructor sets PrimaryActorTick.bCanEverTick = true.",
+      "expected_direct_project_callees_smoke": [
+        "TraceForSign",
+        "CustomizerLikePaste"
+      ]
+    },
+    {
+      "id": "rss-sign-widget-native-tick",
+      "symbol": "URssSignWidget::NativeTick",
+      "source": "Mods/GameFeatures/RSS/Source/RSS/Private/Widget/RssSignWidget.cpp",
+      "needle": "void URssSignWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)",
+      "symbol_token": "NativeTick",
+      "framework_entry_kind": "Unreal UUserWidget NativeTick override",
+      "external_owner": "Unreal UMG widget lifecycle",
+      "confidence": "manual-confirmed",
+      "evidence": "RssSignWidget.h declares virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override.",
+      "expected_direct_project_callees_smoke": [
+        "SynchronizeNativeElements"
+      ]
+    },
+    {
+      "id": "rss-widget-render-component-begin-play",
+      "symbol": "URssWidgetRenderComponent::BeginPlay",
+      "source": "Mods/GameFeatures/RSS/Source/RSS/Private/Widget/RssWidgetRenderComponent.cpp",
+      "needle": "void URssWidgetRenderComponent::BeginPlay()",
+      "symbol_token": "BeginPlay",
+      "framework_entry_kind": "Unreal ActorComponent BeginPlay override",
+      "external_owner": "Unreal component lifecycle",
+      "confidence": "manual-confirmed",
+      "evidence": "RssWidgetRenderComponent.h declares virtual void BeginPlay() override; its implementation calls InitComponent().",
+      "expected_direct_project_callees_smoke": [
+        "InitComponent"
+      ]
+    }
+  ]
+}
