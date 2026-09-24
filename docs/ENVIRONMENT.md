@@ -49,7 +49,9 @@ Do not translate that experiment into a permanent "20.1.8 forever" product rule.
 
 ## 1.4 Rider
 
-Rider is the planned primary frontend, but FactoryLens does not yet require a particular Rider version because the plugin/frontend implementation has not started.
+FL-A020 selects the stable Rider 2026.2 line as the initial MVP target. FL-A030 should begin by pinning Rider 2026.2.2 for repeatable development/CI sandboxing unless implementation evidence requires another 2026.2 patch.
+
+FactoryLens will use a Kotlin/JVM IntelliJ Platform plugin frontend plus IDE-independent Kotlin/JVM analyzer modules. No ReSharper/.NET backend plugin or separate FactoryLens analyzer daemon is planned for the MVP.
 
 ## 1.5 Repository validation
 

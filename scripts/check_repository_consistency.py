@@ -15,6 +15,7 @@ REQUIRED_PATHS = (
     Path("docs/README.md"),
     Path("docs/PRODUCT_SCOPE.md"),
     Path("docs/MVP_CONTRACT.md"),
+    Path("docs/IMPLEMENTATION_BOUNDARY.md"),
     Path("docs/ENVIRONMENT.md"),
     Path("docs/ARCHITECTURE.md"),
     Path("research/README.md"),

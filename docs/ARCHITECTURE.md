@@ -1,8 +1,8 @@
 # 1. FactoryLens architecture
 
-Status: **initial architecture direction**, derived from the completed B1-B8 External Call Map feasibility study.
+Status: **initial architecture direction**, derived from the completed B1-B8 External Call Map feasibility study and the accepted FL-A020 implementation-boundary decision.
 
-This document describes responsibility boundaries and data flow. It does **not** yet choose the implementation language, Rider plugin SDK structure, IPC mechanism, packaging model, or long-term public API.
+This document describes responsibility boundaries and data flow. FL-A020 now chooses Kotlin/JVM for the Rider frontend and reusable analyzer core, with clangd as a persistent external process and no separate FactoryLens daemon or ReSharper backend for the MVP. See [`IMPLEMENTATION_BOUNDARY.md`](IMPLEMENTATION_BOUNDARY.md). Packaging details and the long-term public API remain open.
 
 ## 1.1 Architectural goal
 
@@ -268,12 +268,11 @@ Deep Blueprint graph reconstruction, universal C++ framework analysis, perfect r
 
 ## 1.11 Decisions intentionally still open
 
-BX did not establish the best answer for:
+FL-A020 resolved the implementation language/process questions for the MVP. The following remain open:
 
-- analyzer implementation language;
-- whether clangd is spawned/managed by FactoryLens or integrated through another service boundary;
-- Rider plugin implementation language/backend split;
-- IPC/serialization format if the analyzer is out-of-process;
+- exact Gradle/module/source layout and pinned dependency versions;
+- exact product-facing analyzer/domain interfaces;
+- exact clangd LSP client/transport implementation;
 - cache persistence format/location;
 - packaging/updating strategy;
 - exact UHT metadata ingestion route;
