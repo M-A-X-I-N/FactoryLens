@@ -5,7 +5,6 @@ import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.createDirectories
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.normalize
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 

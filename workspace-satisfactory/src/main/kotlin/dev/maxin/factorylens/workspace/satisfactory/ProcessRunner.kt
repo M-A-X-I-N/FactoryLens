@@ -2,7 +2,6 @@ package dev.maxin.factorylens.workspace.satisfactory
 
 import java.nio.file.Path
 import kotlin.io.path.absolute
-import kotlin.io.path.normalize
 
 public data class ProcessResult(
     public val exitCode: Int,

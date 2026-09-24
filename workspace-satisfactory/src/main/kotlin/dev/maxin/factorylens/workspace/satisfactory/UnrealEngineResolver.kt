@@ -3,7 +3,6 @@ package dev.maxin.factorylens.workspace.satisfactory
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.absolute
-import kotlin.io.path.normalize
 
 public sealed interface EngineResolutionResult {
     public data class Success(

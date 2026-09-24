@@ -4,7 +4,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
 import kotlin.io.path.absolute
-import kotlin.io.path.normalize
 
 public data class FileFingerprint(
     public val size: Long,

@@ -26,7 +26,7 @@ jobs:
 
       - name: Build IDE-independent modules
         shell: bash
-        run: ./gradlew :core:build :semantic-clangd:build :cli:build :cli:installDist --stacktrace
+        run: ./gradlew :core:build :semantic-clangd:build :workspace-satisfactory:build :cli:build :cli:installDist --stacktrace
 
   rider-plugin-build:
     name: rider-plugin-build

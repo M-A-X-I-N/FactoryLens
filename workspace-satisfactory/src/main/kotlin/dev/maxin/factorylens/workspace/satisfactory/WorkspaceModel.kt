@@ -5,7 +5,6 @@ import dev.maxin.factorylens.core.model.SourceUri
 import dev.maxin.factorylens.core.model.WorkspaceId
 import java.nio.file.Path
 import kotlin.io.path.absolute
-import kotlin.io.path.normalize
 
 public data class SatisfactoryWorkspace(
     public val root: Path,
