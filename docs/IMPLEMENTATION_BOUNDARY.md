@@ -251,7 +251,7 @@ That service owns:
 - restart;
 - progress/state flow toward the UI.
 
-Closing the Rider project or unloading FactoryLens must cancel associated work and terminate/release the semantic session cleanc.
+Closing the Rider project or unloading FactoryLens must cancel associated work and terminate/release the semantic session cleanly.
 
 The analyzer core should expose suspending/asynchronous operations but should not depend on IntelliJ coroutine scopes itself.
 
@@ -271,10 +271,10 @@ FL-A030 should establish a Gradle multi-module layout equivalent in responsibili
 
 ```text
 FactoryLens
-站— core / analyzer model + graph + root providers
-站— semantic-clangd / clangd transport/backend adapter
-筞━ cli / headless integration harness
-━ rider-plugin / IntelliJ Platform Rider frontend
+├─ core / analyzer model + graph + root providers
+├─ semantic-clangd / clangd transport/backend adapter
+├─ cli / headless integration harness
+└─ Rider plugin / IntelliJ Platform frontend
 ```
 
 The exact names may differ.
@@ -302,7 +302,7 @@ For the working-product push:
 - initially pin **Rider 2026.2.2** for build/sandbox reproducibility in FL-A030;
 - do not promise older Rider compatibility yet;
 - do not spend MVP effort on 2026.3 EAP support;
-- revisit compatibity/version ranges during FL-D350 packaging/compatibility work.
+- revisit compatibility/version ranges during FL-D350 packaging/compatibility work.
 
 This keeps the implementation target concrete without turning early product work into a compatibility matrix exercise.
 
@@ -310,7 +310,7 @@ This keeps the implementation target concrete without turning early product work
 
 | Alternative | Decision | Reason |
 | --- | --- | --- |
-| Kotlin Rider plugin + in-process reusable Kotlin analyzer + external clangd | **Chosen*.* | Single product language, no custom IPC, analyzer remains headless-testable, heavy C++ work already isolated in clangd. |
+| Kotlin Rider plugin + in-process reusable Kotlin analyzer + external clangd | **Chosen** | Single product language, no custom IPC, analyzer remains headless-testable, heavy C++ work already isolated in clangd. |
 | Kotlin Rider frontend + separate Kotlin/JVM FactoryLens daemon + clangd | Not now | Better isolation, but adds IPC/process/package complexity before evidence requires it. |
 | Kotlin Rider frontend + C# ReSharper backend + clangd | Not now | Standard Rider split is useful for ReSharper language features, but FactoryLens semantics already come from clangd; adds C#, RD protocol, and backend packaging without MVP benefit. |
 | Kotlin Rider frontend + Python analyzer | Rejected for product core | Would reuse research code fastest, but introduces Python runtime/distribution/versioning as an end-user product dependency. Research probes remain valuable as evidence/reference. |
