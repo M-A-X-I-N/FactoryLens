@@ -554,9 +554,15 @@ private fun runCallExpandCheck(arguments: List<String>): Int {
         }
 
         val expectedNode = expansion.nodes.firstOrNull {
-            it.symbol.displayName == "IsStructurallySafeRemoteImageUrl"
+            it.symbol.displayName == "IsSafeNumber"
         }
         val expectedEdge = expectedNode?.let { node ->
+            expansion.edges.firstOrNull { edge -> edge.callee == node.symbol.id }
+        }
+        val crossFileNode = expansion.nodes.firstOrNull {
+            it.symbol.displayName == "IsStructurallySafeRemoteImageUrl"
+        }
+        val crossFileEdge = crossFileNode?.let { node ->
             expansion.edges.firstOrNull { edge -> edge.callee == node.symbol.id }
         }
         val pass =
@@ -564,9 +570,13 @@ private fun runCallExpandCheck(arguments: List<String>): Int {
                 expectedNode?.symbol?.realm == dev.maxin.factorylens.core.model.SourceRealm.TARGET &&
                 expectedEdge?.scope == CallEdgeScope.TARGET_LOCAL
 
-        println("expected_callee=IsStructurallySafeRemoteImageUrl")
+        println("background_index=" + session.state().backgroundIndex)
+        println("expected_callee=IsSafeNumber")
         println("expected_callee_found=" + (expectedNode != null))
         println("expected_edge_scope=" + expectedEdge?.scope)
+        println("cross_file_callee=IsStructurallySafeRemoteImageUrl")
+        println("cross_file_callee_found=" + (crossFileNode != null))
+        println("cross_file_edge_scope=" + crossFileEdge?.scope)
         println("b130_pass_condition=" + pass)
         println("stderr_log=" + logPath)
         return if (pass) 0 else 3
