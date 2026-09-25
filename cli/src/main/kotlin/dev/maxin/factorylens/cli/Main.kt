@@ -181,9 +181,13 @@ private fun runCompileMetadata(arguments: List<String>): Int {
     val acceptedBookkeepingMutations = mutations.filter(
         WorkspaceMutationAudit::isAcceptedUbtTimestampBookkeeping,
     )
-    val unexpectedMutations = mutations.filterNot(
-        WorkspaceMutationAudit::isAcceptedUbtTimestampBookkeeping,
+    val acceptedCompileMetadataBuildStateMutations = mutations.filter(
+        WorkspaceMutationAudit::isAcceptedUbtCompileMetadataBuildState,
     )
+    val unexpectedMutations = mutations.filterNot { mutation ->
+        WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(mutation) ||
+            WorkspaceMutationAudit.isAcceptedUbtCompileMetadataBuildState(mutation)
+    }
 
     val auditPath = output.resolve("workspace-mutation-audit.txt")
     if (before != null) {
@@ -191,16 +195,22 @@ private fun runCompileMetadata(arguments: List<String>): Int {
             appendLine("workspace=" + workspace.root)
             appendLine("mutation_count=" + mutations.size)
             appendLine("accepted_ubt_timestamp_bookkeeping=" + acceptedBookkeepingMutations.size)
+            appendLine(
+                "accepted_ubt_compile_metadata_build_state=" +
+                    acceptedCompileMetadataBuildStateMutations.size,
+            )
             appendLine("unexpected_mutation_count=" + unexpectedMutations.size)
             for (mutation in mutations) {
                 appendLine(mutation.relativePath)
                 appendLine("  kind=" + mutation.kind)
                 appendLine(
                     "  disposition=" +
-                        if (WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(mutation)) {
-                            "ACCEPTED_UBT_TIMESTAMP_BOOKKEEPING"
-                        } else {
-                            "UNEXPECTED"
+                        when {
+                            WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(mutation) ->
+                                "ACCEPTED_UBT_TIMESTAMP_BOOKKEEPING"
+                            WorkspaceMutationAudit.isAcceptedUbtCompileMetadataBuildState(mutation) ->
+                                "ACCEPTED_UBT_COMPILE_METADATA_BUILD_STATE"
+                            else -> "UNEXPECTED"
                         },
                 )
                 appendLine("  before=" + mutation.before)
@@ -222,6 +232,10 @@ private fun runCompileMetadata(arguments: List<String>): Int {
     if (before != null) {
         println("workspace_mutations=" + mutations.size)
         println("workspace_accepted_ubt_timestamp_bookkeeping=" + acceptedBookkeepingMutations.size)
+        println(
+            "workspace_accepted_ubt_compile_metadata_build_state=" +
+                acceptedCompileMetadataBuildStateMutations.size,
+        )
         println("workspace_unexpected_mutations=" + unexpectedMutations.size)
         println("workspace_audit=" + auditPath)
     } else {
