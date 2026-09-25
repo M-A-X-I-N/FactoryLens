@@ -142,7 +142,11 @@ internal class JsonRpcConnection(
             while (true) {
                 val message = readMessage()
                     ?: throw EOFException(
-                        "clangd closed stdout with exit code ${process.poll()}.",
+                        if (process.isAlive) {
+                            "clangd closed stdout while the process still appears to be running."
+                        } else {
+                            "clangd closed stdout with exit code ${process.exitValue()}."
+                        },
                     )
                 dispatch(message)
             }
