@@ -106,7 +106,8 @@ public class ClangdExternalOverrideRootProviderTest {
 
             assertEquals(RootKind.EXTERNAL_OVERRIDE, rootDescriptor.kind)
             assertEquals(RootPriority.SECONDARY, rootDescriptor.priority)
-            assertEquals("ProjectClass::Tick", rootDescriptor.symbol.displayName)
+            assertEquals("ProjectClass::Tick", rootDescriptor.label)
+            assertEquals("Tick", rootDescriptor.symbol.displayName)
             assertEquals(null, rootDescriptor.symbol.qualifiedName)
             assertEquals(SourceRealm.TARGET, rootDescriptor.symbol.realm)
             assertTrue(rootDescriptor.id.value.startsWith("external-override:"))
@@ -142,6 +143,82 @@ public class ClangdExternalOverrideRootProviderTest {
         }
 
         assertEquals("clean", Files.readString(shutdownMarker))
+    }
+
+    @Test
+    public fun rejectsGeneratedOverrideBasesFromGenericExternalRoots(): Unit {
+        val root = Files.createTempDirectory("factorylens-generated-override")
+        val workspace = root.resolve("workspace").createDirectories()
+        val targetRoot = workspace.resolve("Mods/RSS/Source/RSS").createDirectories()
+        val header = targetRoot.resolve("Public/ProjectClass.h")
+        header.parent.createDirectories()
+        header.writeText(
+            listOf(
+                "class ProjectClass {",
+                "public:",
+                "    void Tick() override;",
+                "};",
+            ).joinToString("\n"),
+        )
+        val generatedBase = root.resolve("Intermediate/Build/BaseClass.generated.h")
+        generatedBase.parent.createDirectories()
+        generatedBase.writeText("class BaseClass { virtual void Tick(); };\n")
+
+        val compileDatabase = root.resolve("compile-db").createDirectories()
+        compileDatabase.resolve("compile_commands.json").writeText("[]")
+        val config = ClangdBackendConfig(
+            executable = javaExecutable(),
+            compileCommandsDirectory = compileDatabase,
+            workspaceRoot = workspace,
+            stderrLog = root.resolve("clangd-stderr.log"),
+            launcherArguments = listOf(
+                "-cp",
+                fakeClangdClasspath(),
+                FakeClangdMain::class.java.name,
+                "--fake-version=20.1.8",
+                "--override-header-uri=${header.toUri()}",
+                "--override-base-uri=${generatedBase.toUri()}",
+            ),
+        )
+        val session = assertIs<ClangdBackendStartResult.Success>(
+            ClangdBackendSessionFactory.start(config),
+        ).session
+        val target = AnalysisTarget(
+            id = AnalysisTargetId("rss"),
+            displayName = "RSS",
+            sourceRoots = listOf(SourceUri(targetRoot.toUri().toString())),
+        )
+        val classifier = SourceRealmClassifier { uri ->
+            when (uri) {
+                SourceUri(header.toUri().toString()) -> SourceRealm.TARGET
+                SourceUri(generatedBase.toUri().toString()) -> SourceRealm.GENERATED
+                else -> SourceRealm.OTHER_EXTERNAL
+            }
+        }
+        val callHierarchy = ClangdCallHierarchyAdapter(
+            session = session,
+            target = target.id,
+            realmClassifier = classifier,
+        )
+        val provider = ClangdExternalOverrideRootProvider(
+            session = session,
+            analysisTarget = target,
+            realmClassifier = classifier,
+            callHierarchy = callHierarchy,
+        )
+
+        try {
+            val discovery = assertIs<AnalyzerResult.Success<*>>(
+                provider.discoverRoots(),
+            ).value as dev.maxin.factorylens.core.model.RootDiscovery
+
+            assertTrue(discovery.roots.isEmpty())
+            assertEquals(ResultCompleteness.COMPLETE, discovery.completeness)
+        } finally {
+            provider.close()
+            callHierarchy.close()
+            session.close()
+        }
     }
 
     private fun fakeClangdClasspath(): String {
