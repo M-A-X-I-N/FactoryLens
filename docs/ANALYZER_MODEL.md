@@ -251,7 +251,53 @@ A call edge must always contain evidence.
 
 Cycle/shared-node state is intentionally **not stored on the semantic edge itself**.
 
-Whether an edge closes a cycle depends on the current traversal path. FL-B140 will derive presentation/traversal markers from stable symbol identity rather than permanently labelling a semantic edge as "cycle."
+Whether an edge closes a cycle depends on the current traversal path. FL-B140 derives presentation/traversal markers from stable symbol identity rather than permanently labelling a semantic edge as "cycle."
+
+### Supported graph/session behavior
+
+FL-B140 adds the IDE-independent `CallGraphSession` in `core`. It consumes one-origin `CallExpansion` results through the small `CallExpansionSource` seam and owns graph reuse rather than semantic discovery.
+
+The supported cache/traversal rules are:
+
+- successful one-origin expansions are cached by origin `SymbolId` for the lifetime of the graph session;
+- recoverable/failed queries are **not** cached, so retry remains meaningful;
+- semantic nodes are merged globally by `SymbolId`;
+- semantic edges are merged by caller/callee identity, with duplicate call sites/evidence deduplicated;
+- conflicting symbol descriptors, target IDs, origin IDs, edge owners, or boundary scopes are treated as backend/protocol errors rather than silently merged;
+- boundary nodes/edges remain in the semantic graph but boundary nodes are never recursively expanded;
+- `clear()` drops all graph/query cache state so a higher analyzer-session restart cannot accidentally reuse pre-restart semantic results.
+
+Two access shapes intentionally coexist:
+
+```text
+expand(origin)
+  -> one lazy cache-backed semantic expansion
+
+traverse(root, limits)
+  -> bounded tree-oriented projection assembled from lazy expansions
+```
+
+The tree projection uses `CallTreeNodeDisposition` to distinguish:
+
+```text
+EXPANDED
+LEAF
+BOUNDARY
+SHARED
+CYCLE
+DEPTH_LIMIT
+```
+
+`SHARED` and `CYCLE` are path/presentation facts. They do not modify the underlying semantic node or edge.
+
+Traversal bounds are explicit through `CallGraphTraversalLimits`:
+
+- `maxDepth` limits recursive target expansion from the root;
+- `maxTargetNodes` limits unique `TARGET` nodes admitted to the traversal projection.
+
+The target-node limit deliberately does **not** count boundary nodes. This matches the B4/B5 evidence: external calls are retained as evidence but are not recursive project-graph growth. Reaching either configured limit is reported explicitly and makes the bounded traversal result `PARTIAL` unless its semantic completeness was already `UNKNOWN`.
+
+Repeated traversal over unchanged origins therefore reuses the in-session expansion cache instead of re-querying the semantic backend.
 
 ## 1.8 Result completeness
 
