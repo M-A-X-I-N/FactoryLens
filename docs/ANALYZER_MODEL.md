@@ -157,7 +157,7 @@ The initial realm rules are:
 - `DEPENDENCY_MOD` — another path beneath `<workspace>/Mods` after the selected target and SML have been excluded;
 - `OTHER_EXTERNAL` — any other local file path, including other workspace plugins and sources outside both the workspace and resolved engine root.
 
-The classifier is lexical over normalized paths and deliberately does not resolve filesystem symlinks/junctions. The semantic backend is classified against the path it actually reports, while targets may declare more than one source root when a supported project boundary spans multiple trees.
+The classifier preserves the source URI actually reported by the semantic backend, but ownership checks compare both normalized lexical paths and real-path equivalents when those paths exist. This matters because clangd may canonicalize a file through a symlink or Windows junction before returning its URI. A file therefore remains in the configured target realm when the configured target root and clangd-reported path refer to the same physical tree. Targets may still declare more than one source root when a supported project boundary genuinely spans multiple trees.
 
 The model establishes the vocabulary early so graph, filtering, and UI layers do not invent incompatible boundary enums independently.
 
