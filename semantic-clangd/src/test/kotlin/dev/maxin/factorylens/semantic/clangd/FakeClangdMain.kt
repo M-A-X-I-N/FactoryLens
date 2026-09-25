@@ -41,6 +41,12 @@ internal object FakeClangdMain {
         val boundaryCalleeUri = args
             .firstOrNull { it.startsWith("--boundary-callee-uri=") }
             ?.substringAfter('=')
+        val overrideHeaderUri = args
+            .firstOrNull { it.startsWith("--override-header-uri=") }
+            ?.substringAfter('=')
+        val overrideBaseUri = args
+            .firstOrNull { it.startsWith("--override-base-uri=") }
+            ?.substringAfter('=')
 
         while (true) {
             val message = readMessage(input) ?: return
@@ -94,11 +100,14 @@ internal object FakeClangdMain {
 
                 "textDocument/prepareCallHierarchy" -> {
                     prepareSequence += 1
-                    val uri = message
-                        .getAsJsonObject("params")
+                    val params = message.getAsJsonObject("params")
+                    val uri = params
                         .getAsJsonObject("textDocument")
                         .get("uri")
                         .asString
+                    val position = params.getAsJsonObject("position")
+                    val line = position?.get("line")?.asInt ?: 2
+                    val overrideFixture = uri == overrideHeaderUri && line == 2
                     send(
                         output,
                         gson,
@@ -107,17 +116,158 @@ internal object FakeClangdMain {
                             JsonArray().apply {
                                 add(
                                     callHierarchyItem(
-                                        name = "RootMethod",
+                                        name =
+                                            if (overrideFixture) {
+                                                "ProjectClass::Tick"
+                                            } else {
+                                                "RootMethod"
+                                            },
                                         uri = uri,
-                                        line = 2,
-                                        startCharacter = 4,
-                                        endCharacter = 14,
+                                        line = line,
+                                        startCharacter =
+                                            if (overrideFixture) 9 else 4,
+                                        endCharacter =
+                                            if (overrideFixture) 13 else 14,
                                         opaqueSequence = prepareSequence,
                                     ),
                                 )
                             },
                         ),
                     )
+                }
+
+                "textDocument/documentSymbol" -> {
+                    val uri = message
+                        .getAsJsonObject("params")
+                        .getAsJsonObject("textDocument")
+                        .get("uri")
+                        .asString
+                    val result =
+                        if (uri == overrideHeaderUri) {
+                            JsonArray().apply {
+                                add(
+                                    JsonObject().apply {
+                                        addProperty("name", "ProjectClass")
+                                        addProperty("kind", 5)
+                                        add("range", rangeJson(0, 0, 8, 1))
+                                        add("selectionRange", rangeJson(0, 6, 0, 18))
+                                        add(
+                                            "children",
+                                            JsonArray().apply {
+                                                add(
+                                                    JsonObject().apply {
+                                                        addProperty("name", "Tick")
+                                                        addProperty("kind", 6)
+                                                        add("range", rangeJson(2, 4, 2, 30))
+                                                        add(
+                                                            "selectionRange",
+                                                            rangeJson(2, 9, 2, 13),
+                                                        )
+                                                    },
+                                                )
+                                                add(
+                                                    JsonObject().apply {
+                                                        addProperty("name", "CheckCopy")
+                                                        addProperty("kind", 6)
+                                                        add("range", rangeJson(5, 4, 5, 25))
+                                                        add(
+                                                            "selectionRange",
+                                                            rangeJson(5, 9, 5, 18),
+                                                        )
+                                                    },
+                                                )
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        } else {
+                            JsonArray()
+                        }
+                    send(output, gson, response(message, result))
+                }
+
+                "textDocument/ast" -> {
+                    val uri = message
+                        .getAsJsonObject("params")
+                        .getAsJsonObject("textDocument")
+                        .get("uri")
+                        .asString
+                    val result =
+                        if (uri == overrideHeaderUri) {
+                            JsonObject().apply {
+                                addProperty("kind", "CXXRecord")
+                                addProperty("detail", "ProjectClass")
+                                add("range", rangeJson(0, 0, 8, 1))
+                                add(
+                                    "children",
+                                    JsonArray().apply {
+                                        add(
+                                            JsonObject().apply {
+                                                addProperty("kind", "CXXMethod")
+                                                addProperty("detail", "Tick")
+                                                add("range", rangeJson(2, 4, 2, 30))
+                                                add(
+                                                    "children",
+                                                    JsonArray().apply {
+                                                        add(
+                                                            JsonObject().apply {
+                                                                addProperty("role", "attribute")
+                                                                addProperty("kind", "Override")
+                                                                addProperty("detail", "override")
+                                                                add(
+                                                                    "range",
+                                                                    rangeJson(2, 20, 2, 28),
+                                                                )
+                                                            },
+                                                        )
+                                                    },
+                                                )
+                                            },
+                                        )
+                                        add(
+                                            JsonObject().apply {
+                                                addProperty("kind", "CXXMethod")
+                                                addProperty("detail", "CheckCopy")
+                                                add("range", rangeJson(5, 4, 5, 25))
+                                                add("children", JsonArray())
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        } else {
+                            JsonNull.INSTANCE
+                        }
+                    send(output, gson, response(message, result))
+                }
+
+                "textDocument/definition" -> {
+                    val params = message.getAsJsonObject("params")
+                    val uri = params
+                        .getAsJsonObject("textDocument")
+                        .get("uri")
+                        .asString
+                    val position = params.getAsJsonObject("position")
+                    val line = position?.get("line")?.asInt
+                    val result =
+                        if (
+                            uri == overrideHeaderUri &&
+                            line == 2 &&
+                            overrideBaseUri != null
+                        ) {
+                            JsonArray().apply {
+                                add(
+                                    JsonObject().apply {
+                                        addProperty("uri", overrideBaseUri)
+                                        add("range", rangeJson(40, 4, 40, 18))
+                                    },
+                                )
+                            }
+                        } else {
+                            JsonArray()
+                        }
+                    send(output, gson, response(message, result))
                 }
 
                 "callHierarchy/outgoingCalls" -> {
