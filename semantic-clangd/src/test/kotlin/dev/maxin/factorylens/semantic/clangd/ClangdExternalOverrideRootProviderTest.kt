@@ -106,7 +106,8 @@ public class ClangdExternalOverrideRootProviderTest {
 
             assertEquals(RootKind.EXTERNAL_OVERRIDE, rootDescriptor.kind)
             assertEquals(RootPriority.SECONDARY, rootDescriptor.priority)
-            assertEquals("ProjectClass::Tick", rootDescriptor.symbol.qualifiedName)
+            assertEquals("ProjectClass::Tick", rootDescriptor.symbol.displayName)
+            assertEquals(null, rootDescriptor.symbol.qualifiedName)
             assertEquals(SourceRealm.TARGET, rootDescriptor.symbol.realm)
             assertTrue(rootDescriptor.id.value.startsWith("external-override:"))
             assertEquals(1, rootDescriptor.evidence.size)
