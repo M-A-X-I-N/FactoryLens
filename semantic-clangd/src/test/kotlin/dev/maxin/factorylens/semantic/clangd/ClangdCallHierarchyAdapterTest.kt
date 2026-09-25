@@ -70,7 +70,18 @@ public class ClangdCallHierarchyAdapterTest {
             val expansion = assertIs<AnalyzerResult.Success<*>>(
                 adapter.expandOutgoingCalls(firstSymbol.id),
             ).value as dev.maxin.factorylens.core.model.CallExpansion
+            val repeatedExpansion = assertIs<AnalyzerResult.Success<*>>(
+                adapter.expandOutgoingCalls(firstSymbol.id),
+            ).value as dev.maxin.factorylens.core.model.CallExpansion
 
+            assertEquals(
+                expansion.nodes.map { it.symbol.id }.toSet(),
+                repeatedExpansion.nodes.map { it.symbol.id }.toSet(),
+            )
+            assertEquals(
+                expansion.edges.map { it.callee }.toSet(),
+                repeatedExpansion.edges.map { it.callee }.toSet(),
+            )
             assertEquals(AnalysisTargetId("rss"), expansion.target)
             assertEquals(firstSymbol.id, expansion.origin)
             assertEquals(ResultCompleteness.PARTIAL, expansion.completeness)
