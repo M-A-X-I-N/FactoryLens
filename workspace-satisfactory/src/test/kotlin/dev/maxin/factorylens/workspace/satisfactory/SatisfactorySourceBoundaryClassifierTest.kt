@@ -15,7 +15,7 @@ public class SatisfactorySourceBoundaryClassifierTest {
     @Test
     public fun classifiesSupportedSatisfactorySourceRealms(): Unit {
         val fixture = fixture()
-        val classifier = fixture.classifier
+        val classifier = fixture.requiredClassifier
 
         assertEquals(
             SourceRealm.TARGET,
@@ -86,7 +86,7 @@ public class SatisfactorySourceBoundaryClassifierTest {
     @Test
     public fun generatedClassificationWinsOverOwningRealm(): Unit {
         val fixture = fixture()
-        val classifier = fixture.classifier
+        val classifier = fixture.requiredClassifier
 
         assertEquals(
             SourceRealm.GENERATED,
@@ -117,7 +117,7 @@ public class SatisfactorySourceBoundaryClassifierTest {
     @Test
     public fun classifiesFileUrisAndLeavesUnsupportedUrisUnknown(): Unit {
         val fixture = fixture()
-        val classifier = fixture.classifier
+        val classifier = fixture.requiredClassifier
         val targetFile = fixture.rssRoot.resolve("Public/RssApiClient.h")
 
         assertEquals(
@@ -140,7 +140,7 @@ public class SatisfactorySourceBoundaryClassifierTest {
 
         assertEquals(
             SourceRealm.FACTORY_GAME,
-            fixture.classifier.classify(
+            fixture.requiredClassifier.classify(
                 Path.of("Source/FactoryGame/Private/FGGameMode.cpp"),
             ),
         )
@@ -215,25 +215,9 @@ public class SatisfactorySourceBoundaryClassifierTest {
         val rssMod: Path,
         val rssRoot: Path,
         val extraTargetRoot: Path,
-        private val classifierValue: SatisfactorySourceBoundaryClassifier?,
+        val classifier: SatisfactorySourceBoundaryClassifier?,
     ) {
-        constructor(
-            workspace: SatisfactoryWorkspace,
-            engine: UnrealEngineInstallation,
-            rssMod: Path,
-            rssRoot: Path,
-            extraTargetRoot: Path,
-            classifier: SatisfactorySourceBoundaryClassifier?,
-        ) : this(
-            workspace,
-            engine,
-            rssMod,
-            rssRoot,
-            extraTargetRoot,
-            classifierValue = classifier,
-        )
-
-        val classifier: SatisfactorySourceBoundaryClassifier
-            get() = requireNotNull(classifierValue)
+        val requiredClassifier: SatisfactorySourceBoundaryClassifier
+            get() = requireNotNull(classifier)
     }
 }
