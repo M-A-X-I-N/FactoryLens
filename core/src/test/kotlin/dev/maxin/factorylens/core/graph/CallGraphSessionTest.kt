@@ -101,7 +101,7 @@ public class CallGraphSessionTest {
         )
 
         assertEquals(
-            listOf(a.symbol.id, b.symbol.id, d.symbol.id, c.symbol.id),
+            listOf(a.symbol.id, b.symbol.id, c.symbol.id, d.symbol.id),
             source.queries,
         )
 
@@ -133,6 +133,50 @@ public class CallGraphSessionTest {
         )
         assertEquals(5, snapshot.nodes.size)
         assertEquals(6, snapshot.edges.size)
+    }
+
+    @Test
+    public fun expandsSharedNodeAtItsShallowestBreadthFirstDepth(): Unit {
+        val a = node("A")
+        val b = node("B")
+        val c = node("C")
+        val deep = node("Deep")
+        val shared = node("Shared")
+        val leaf = node("Leaf")
+
+        val source = RecordingSource(
+            mapOf(
+                a.symbol.id to expansion(a, edge(a, b), edge(a, c)),
+                b.symbol.id to expansion(b, edge(b, deep)),
+                c.symbol.id to expansion(c, edge(c, shared)),
+                deep.symbol.id to expansion(deep, edge(deep, shared)),
+                shared.symbol.id to expansion(shared, edge(shared, leaf)),
+                leaf.symbol.id to expansion(leaf),
+            ),
+        )
+        val graph = CallGraphSession(target, source)
+
+        val traversal = assertIs<AnalyzerResult.Success<*>>(
+            graph.traverse(
+                root = a,
+                limits = CallGraphTraversalLimits(
+                    maxDepth = 3,
+                    maxTargetNodes = 10,
+                ),
+            ),
+        ).value as dev.maxin.factorylens.core.model.CallGraphTraversal
+
+        assertTrue(shared.symbol.id in source.queries)
+        assertTrue(leaf.symbol.id !in source.queries)
+        assertEquals(
+            2,
+            flatten(traversal.tree)
+                .first { it.node.symbol.id == shared.symbol.id }
+                .depth,
+        )
+        assertTrue(
+            traversal.nodes.any { it.symbol.id == leaf.symbol.id },
+        )
     }
 
     @Test
