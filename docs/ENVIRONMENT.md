@@ -93,6 +93,23 @@ Backend version and capability mismatches are explicit startup failures rather t
 
 Real Windows FL-B110 validation on 2026-09-25 used clangd 20.1.8 from the WinGet link and the 2,175-entry UBT Clang compile database. Supported FactoryLens code initialized the backend to `READY`, observed `callHierarchyProvider=true`, reported the configured background-index cache under FactoryLens `work/`, and shut the same process down cleanly to `STOPPED`. The task-specific validation script exercised this path without invoking any migrated BX research probe.
 
+
+### Supported FL-B130 outgoing-call validation
+
+Real Windows FL-B130 validation on 2026-09-25 used the same clangd 20.1.8 backend and freshly regenerated 2,175-entry UBT Clang compile database against the live RSS2 `URssBlueprintFunctionLibrary::IsSignDataSafe` specimen.
+
+Supported FactoryLens code:
+
+- prepared the RSS2 method semantically;
+- classified the origin and RSS2 callees as `TARGET`, including when clangd canonicalized their URI through the workspace's junction/symlink-backed `vendor/rss-current` physical tree;
+- returned stable FactoryLens symbol identities and explicit `TARGET_LOCAL` versus `BOUNDARY` edges;
+- returned 13 outgoing nodes / 13 edges in that foreground query, including the project-local `IsSafeNumber` edge and ordinary Unreal boundary calls;
+- preserved `PARTIAL` completeness plus an explicit diagnostic that clangd call hierarchy is static semantic evidence rather than proof of all runtime/framework dispatch;
+- reported `background_index=RUNNING` while still returning the foreground result;
+- shut the backend down cleanly to `STOPPED`.
+
+The historically proven cross-file `IsStructurallySafeRemoteImageUrl` edge was not yet present in that cold foreground query because the full workspace background index was still running. FL-B130 therefore validates supported one-level outgoing-call expansion using an immediately foreground-resolvable target-local edge and records the cross-file edge only as an observation. Cross-file/whole-specimen coverage remains part of later validation rather than a hidden completeness claim.
+
 ## 1.4 Rider
 
 FL-A020 selects the stable Rider 2026.2 line as the initial MVP target. FL-A030 should begin by pinning Rider 2026.2.2 for repeatable development/CI sandboxing unless implementation evidence requires another 2026.2 patch.
