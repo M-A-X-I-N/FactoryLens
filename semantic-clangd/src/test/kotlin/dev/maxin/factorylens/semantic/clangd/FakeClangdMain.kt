@@ -118,7 +118,7 @@ internal object FakeClangdMain {
                                     callHierarchyItem(
                                         name =
                                             if (overrideFixture) {
-                                                "ProjectClass::Tick"
+                                                "Tick"
                                             } else {
                                                 "RootMethod"
                                             },
