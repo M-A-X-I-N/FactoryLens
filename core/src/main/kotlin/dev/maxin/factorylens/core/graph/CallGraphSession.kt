@@ -438,26 +438,38 @@ public class CallGraphSession(
 
     private fun mergeExpansion(expansion: CallExpansion): AnalyzerError? {
         for (node in expansion.nodes) {
-            mergeNode(node)?.let { return it }
+            val existing = knownNodes[node.symbol.id]
+            if (existing != null && existing != node) {
+                return AnalyzerError(
+                    code = AnalyzerErrorCode.BACKEND_PROTOCOL_ERROR,
+                    message =
+                        "Symbol ${node.symbol.id.value} changed descriptor inside one graph session.",
+                    recoverable = false,
+                )
+            }
         }
 
         for (edge in expansion.edges) {
-            val key = EdgeKey(edge.caller, edge.callee)
-            val existing = knownEdges[key]
-            if (existing == null) {
-                knownEdges[key] = edge
-            } else {
-                if (existing.scope != edge.scope) {
-                    return AnalyzerError(
-                        code = AnalyzerErrorCode.BACKEND_PROTOCOL_ERROR,
-                        message =
-                            "Cached edge ${edge.caller.value} -> ${edge.callee.value} " +
-                            "changed scope from ${existing.scope} to ${edge.scope}.",
-                        recoverable = false,
-                    )
-                }
-                knownEdges[key] = mergeEdges(existing, edge)
+            val existing = knownEdges[EdgeKey(edge.caller, edge.callee)]
+            if (existing != null && existing.scope != edge.scope) {
+                return AnalyzerError(
+                    code = AnalyzerErrorCode.BACKEND_PROTOCOL_ERROR,
+                    message =
+                        "Cached edge ${edge.caller.value} -> ${edge.callee.value} " +
+                        "changed scope from ${existing.scope} to ${edge.scope}.",
+                    recoverable = false,
+                )
             }
+        }
+
+        for (node in expansion.nodes) {
+            knownNodes.putIfAbsent(node.symbol.id, node)
+        }
+        for (edge in expansion.edges) {
+            val key = EdgeKey(edge.caller, edge.callee)
+            knownEdges[key] = knownEdges[key]?.let { existing ->
+                mergeEdges(existing, edge)
+            } ?: edge
         }
 
         return null
