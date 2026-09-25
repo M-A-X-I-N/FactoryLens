@@ -6,7 +6,9 @@ plugins {
 
 dependencies {
     implementation(project(":core"))
+    implementation("com.google.code.gson:gson:2.14.0")
     compileOnly(kotlin("stdlib"))
+    testImplementation(kotlin("test"))
 }
 
 kotlin {
@@ -15,4 +17,8 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
