@@ -230,7 +230,7 @@ public class ClangdCallHierarchyAdapter(
                 EdgeAccumulator(callee.symbol)
             }
             val ranges = entry.get("fromRanges")
-            if (ranges != null && ranges.isJsonArray) {
+            if (ranges != null && ranges.isJsonArray && hasTrustworthyCallSiteUri(originItem)) {
                 for (rangeElement in ranges.asJsonArray) {
                     parseRange(rangeElement)?.let { range ->
                         accumulator.callSites += SourceLocation(
@@ -247,6 +247,15 @@ public class ClangdCallHierarchyAdapter(
                 code = "clangd-call-hierarchy-malformed-entry",
                 severity = DiagnosticSeverity.WARNING,
                 message = "Skipped $skippedEntries malformed clangd outgoing-call entries.",
+            )
+        }
+        if (!hasTrustworthyCallSiteUri(originItem) && outgoing.size() > 0) {
+            diagnostics += AnalyzerDiagnostic(
+                code = "clangd-call-site-uri-ambiguous",
+                severity = DiagnosticSeverity.INFO,
+                message =
+                    "clangd returned outgoing call ranges without a trustworthy source-file URI; " +
+                    "call-site navigation was omitted rather than mapped through a canonical declaration URI.",
             )
         }
 
@@ -358,7 +367,12 @@ public class ClangdCallHierarchyAdapter(
             qualifiedName = null,
             kind = mapSymbolKind(kindNumber),
             realm = realmClassifier.classify(uri),
-            navigation = NavigationTargets(),
+            navigation = NavigationTargets(
+                declaration = SourceLocation(
+                    uri = uri,
+                    range = selectionRange,
+                ),
+            ),
         )
         return ParsedItem(
             raw = item.deepCopy(),
@@ -411,6 +425,24 @@ public class ClangdCallHierarchyAdapter(
             13, 14 -> SymbolKind.VARIABLE
             else -> SymbolKind.OTHER
         }
+
+    private fun hasTrustworthyCallSiteUri(item: JsonObject): Boolean {
+        val uri = item.stringOrNull("uri") ?: return false
+        val path = try {
+            val parsed = java.net.URI(uri)
+            if (!parsed.scheme.equals("file", ignoreCase = true)) {
+                return false
+            }
+            Path.of(parsed)
+        } catch (_: Exception) {
+            return false
+        }
+
+        return when (path.fileName?.toString()?.substringAfterLast('.', "")?.lowercase()) {
+            "cpp", "cc", "cxx" -> true
+            else -> false
+        }
+    }
 
     private fun parseRange(element: JsonElement?): SourceRange? {
         if (element == null || !element.isJsonObject) {
