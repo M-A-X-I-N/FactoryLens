@@ -57,6 +57,7 @@ FactoryLens/
 ├─ src/                    Rider plugin frontend shell
 ├─ core/                   IDE-independent product core
 ├─ semantic-clangd/        clangd semantic adapter
+├─ workspace-satisfactory/ SML/UE/UBT workspace adapter
 ├─ cli/                    headless developer harness
 ├─ docs/
 ├─ research/

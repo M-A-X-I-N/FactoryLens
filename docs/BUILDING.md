@@ -126,7 +126,7 @@ Existing Python/repository checks validate documentation structure, generated-st
 The JVM workflow:
 
 1. installs Java 25;
-2. validates/builds `core`, `semantic-clangd`, and `cli` on Windows and Ubuntu;
+2. validates/builds `core`, `semantic-clangd`, `workspace-satisfactory`, and `cli` on Windows and Ubuntu;
 3. builds the Rider plugin distribution on Ubuntu;
 4. runs IntelliJ Platform plugin-project configuration verification.
 
