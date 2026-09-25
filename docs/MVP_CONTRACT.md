@@ -216,6 +216,26 @@ merely to make analysis work.
 
 FactoryLens-generated indexes, caches, logs, and intermediate analysis state belong in FactoryLens-controlled generated/cache locations.
 
+### Narrow UBT bookkeeping exception
+
+Compile-metadata acquisition may invoke UnrealBuildTool against an already-built SML workspace. The supported `GenerateClangDatabase` path uses `-NoExecCodeGenActions`, but UBT still refreshes its existing generated bookkeeping files matching:
+
+```text
+**/Intermediate/Build/**/UHT/Timestamp
+```
+
+Those files are not authored source or generated UHT source; they are UnrealBuildTool-owned timestamp/bookkeeping state. Rewriting an **existing** file in that exact class is an accepted exception to the read-only baseline.
+
+The exception is deliberately narrow:
+
+- FactoryLens must continue auditing the workspace before and after compile-metadata acquisition;
+- the file must exist both before and after the UBT invocation;
+- additions or removals are not accepted by this exception;
+- generated headers/source, response files, project configuration, authored source, plugin descriptors, and every other workspace mutation remain unexpected;
+- unexpected mutations must fail the validation path rather than being silently ignored.
+
+This exception exists because real FL-B100 validation showed that `-NoExecCodeGenActions` reduces UBT side effects to UHT timestamp bookkeeping while still producing the real compile view. It must not be generalized into permission for FactoryLens to write arbitrary generated or mod-local files.
+
 ## 1.10 Validation specimens
 
 The working-product gate must be exercised against real source in the configured development environment.

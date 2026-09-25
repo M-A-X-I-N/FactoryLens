@@ -102,6 +102,39 @@ public object WorkspaceMutationAudit {
             }
     }
 
+    public fun isAcceptedUbtTimestampBookkeeping(mutation: WorkspaceMutation): Boolean {
+        if (mutation.before == null || mutation.after == null) {
+            return false
+        }
+        if (
+            mutation.kind != WorkspaceMutationKind.CONTENT &&
+            mutation.kind != WorkspaceMutationKind.METADATA_ONLY
+        ) {
+            return false
+        }
+
+        val segments = mutation.relativePath
+            .split('/', '\\')
+            .filter { it.isNotEmpty() }
+        if (segments.size < 5) {
+            return false
+        }
+        if (segments.last() != "Timestamp" || segments[segments.lastIndex - 1] != "UHT") {
+            return false
+        }
+
+        val intermediateIndex = segments.indexOf("Intermediate")
+        if (intermediateIndex < 0 || intermediateIndex + 1 >= segments.size) {
+            return false
+        }
+        if (segments[intermediateIndex + 1] != "Build") {
+            return false
+        }
+
+        val uhtIndex = segments.lastIndex - 1
+        return intermediateIndex + 2 < uhtIndex
+    }
+
     private fun classify(
         before: FileFingerprint?,
         after: FileFingerprint?,

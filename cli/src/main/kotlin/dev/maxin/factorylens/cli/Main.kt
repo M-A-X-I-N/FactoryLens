@@ -167,14 +167,31 @@ private fun runCompileMetadata(arguments: List<String>): Int {
         emptyList()
     }
 
+    val acceptedBookkeepingMutations = mutations.filter(
+        WorkspaceMutationAudit::isAcceptedUbtTimestampBookkeeping,
+    )
+    val unexpectedMutations = mutations.filterNot(
+        WorkspaceMutationAudit::isAcceptedUbtTimestampBookkeeping,
+    )
+
     val auditPath = output.resolve("workspace-mutation-audit.txt")
     if (before != null) {
         val report = buildString {
             appendLine("workspace=" + workspace.root)
             appendLine("mutation_count=" + mutations.size)
+            appendLine("accepted_ubt_timestamp_bookkeeping=" + acceptedBookkeepingMutations.size)
+            appendLine("unexpected_mutation_count=" + unexpectedMutations.size)
             for (mutation in mutations) {
                 appendLine(mutation.relativePath)
                 appendLine("  kind=" + mutation.kind)
+                appendLine(
+                    "  disposition=" +
+                        if (WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(mutation)) {
+                            "ACCEPTED_UBT_TIMESTAMP_BOOKKEEPING"
+                        } else {
+                            "UNEXPECTED"
+                        },
+                )
                 appendLine("  before=" + mutation.before)
                 appendLine("  after=" + mutation.after)
             }
@@ -193,15 +210,17 @@ private fun runCompileMetadata(arguments: List<String>): Int {
     println("ubt_log=" + success.logPath)
     if (before != null) {
         println("workspace_mutations=" + mutations.size)
+        println("workspace_accepted_ubt_timestamp_bookkeeping=" + acceptedBookkeepingMutations.size)
+        println("workspace_unexpected_mutations=" + unexpectedMutations.size)
         println("workspace_audit=" + auditPath)
     } else {
         println("workspace_mutations=audit-skipped")
     }
 
-    if (mutations.isNotEmpty()) {
+    if (unexpectedMutations.isNotEmpty()) {
         System.err.println()
         System.err.println(
-            "Workspace mutation audit detected changes. Inspect the audit before treating B100 as read-only.",
+            "Workspace mutation audit detected unexpected changes. Inspect the audit before treating B100 as read-only.",
         )
         return 3
     }

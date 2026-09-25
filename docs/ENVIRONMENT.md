@@ -40,6 +40,22 @@ FACTORYLENS_ENGINE_ROOT=
 
 The migrated B1-B7 research probes use this path to access the real Unreal/SML workspace. Generated compile databases, clangd indexes, logs, and graph output belong under ignored `work/`.
 
+### Supported FL-B100 compile-metadata path
+
+The supported workspace module resolves the configured SML workspace and engine, then obtains the default real Windows analysis view through UnrealBuildTool:
+
+```text
+FactoryEditor Win64 Development
+-Compiler=VisualStudio2022
+-Mode=GenerateClangDatabase
+-NoExecCodeGenActions
+-OutputDir=<FactoryLens repository>/work/factorylens/compile-metadata/msvc
+```
+
+Real Windows validation on 2026-09-25 produced 2,175 translation-unit entries, matching the migrated B1 feasibility baseline.
+
+The pre/post mutation audit found that `-NoExecCodeGenActions` removes the broader response-file/code-generation churn observed during the first validation pass. The remaining 36 mutations were all existing `**/Intermediate/Build/**/UHT/Timestamp` bookkeeping files: 19 changed bookkeeping contents and 17 changed filesystem metadata only. That exact existing-file rewrite is the narrow exception documented in [`MVP_CONTRACT.md`](MVP_CONTRACT.md); every other workspace mutation remains unexpected.
+
 ## 1.3 clangd
 
 The feasibility study found clangd behavior to be version-sensitive:

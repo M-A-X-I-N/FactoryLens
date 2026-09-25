@@ -77,6 +77,76 @@ public class WorkspaceMutationAuditTest {
     }
 
     @Test
+    public fun acceptsOnlyExistingUbtTimestampBookkeepingRewrites(): Unit {
+        val before = FileFingerprint(
+            size = 100,
+            modifiedMillis = 1,
+            sha256 = "before",
+        )
+        val after = FileFingerprint(
+            size = 100,
+            modifiedMillis = 2,
+            sha256 = "after",
+        )
+
+        assertTrue(
+            WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(
+                WorkspaceMutation(
+                    relativePath =
+                        "Mods\\FicsitWiremod\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\FicsitWiremod\\UHT\\Timestamp",
+                    before = before,
+                    after = after,
+                    kind = WorkspaceMutationKind.CONTENT,
+                ),
+            ),
+        )
+        assertTrue(
+            WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(
+                WorkspaceMutation(
+                    relativePath =
+                        "Intermediate/Build/Win64/UnrealEditor/Inc/FactoryEditor/UHT/Timestamp",
+                    before = before,
+                    after = after.copy(sha256 = "before"),
+                    kind = WorkspaceMutationKind.METADATA_ONLY,
+                ),
+            ),
+        )
+        assertTrue(
+            !WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(
+                WorkspaceMutation(
+                    relativePath =
+                        "Mods\\FicsitWiremod\\Source\\FicsitWiremod\\UHT\\Timestamp",
+                    before = before,
+                    after = after,
+                    kind = WorkspaceMutationKind.CONTENT,
+                ),
+            ),
+        )
+        assertTrue(
+            !WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(
+                WorkspaceMutation(
+                    relativePath =
+                        "Mods\\FicsitWiremod\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\FicsitWiremod\\UHT\\Timestamp",
+                    before = null,
+                    after = after,
+                    kind = WorkspaceMutationKind.ADDED,
+                ),
+            ),
+        )
+        assertTrue(
+            !WorkspaceMutationAudit.isAcceptedUbtTimestampBookkeeping(
+                WorkspaceMutation(
+                    relativePath =
+                        "Mods\\FicsitWiremod\\Intermediate\\Build\\Win64\\UnrealEditor\\Inc\\FicsitWiremod\\FicsitWiremod.generated.h",
+                    before = before,
+                    after = after,
+                    kind = WorkspaceMutationKind.CONTENT,
+                ),
+            ),
+        )
+    }
+
+    @Test
     public fun keepsIntermediateInAuditButExcludesKnownNoiseDirectories(): Unit {
         val root = Files.createTempDirectory("factorylens-audit")
         root.resolve("Intermediate").createDirectories()
