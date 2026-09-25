@@ -355,9 +355,9 @@ public class ClangdExternalOverrideRootProvider(
                     Files.isDirectory(root) -> {
                         Files.walk(root).use { stream ->
                             stream
-                                .filter(Files::isRegularFile)
-                                .filter(::isHeader)
-                                .map { it.toAbsolutePath().normalize() }
+                                .filter { path -> Files.isRegularFile(path) }
+                                .filter { path -> isHeader(path) }
+                                .map { path -> path.toAbsolutePath().normalize() }
                                 .toList()
                         }
                     }
