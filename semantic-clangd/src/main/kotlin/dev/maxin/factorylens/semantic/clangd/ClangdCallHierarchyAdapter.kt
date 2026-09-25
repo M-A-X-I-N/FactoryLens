@@ -48,7 +48,6 @@ public class ClangdCallHierarchyAdapter(
     private val closed = AtomicBoolean(false)
     private val items = ConcurrentHashMap<SymbolId, JsonObject>()
     private val symbols = ConcurrentHashMap<SymbolId, SymbolDescriptor>()
-    private val openedDocuments = ConcurrentHashMap<SourceUri, Unit>()
 
     public fun prepareSymbol(
         sourceFile: Path,
@@ -301,41 +300,14 @@ public class ClangdCallHierarchyAdapter(
     private fun ensureDocumentOpen(
         file: Path,
         uri: SourceUri,
-    ): AnalyzerError? {
-        if (openedDocuments.putIfAbsent(uri, Unit) != null) {
-            return null
-        }
-
-        val text = try {
-            Files.readString(file, StandardCharsets.UTF_8).removePrefix("\uFEFF")
-        } catch (error: Throwable) {
-            openedDocuments.remove(uri)
-            return AnalyzerError(
-                code = AnalyzerErrorCode.QUERY_FAILED,
-                message = "Could not read source file for clangd: $file",
-                recoverable = true,
-                details = error.message,
-            )
-        }
-
-        return try {
-            session.notify(
-                "textDocument/didOpen",
-                JsonObject().apply {
-                    add(
-                        "textDocument",
-                        JsonObject().apply {
-                            addProperty("uri", uri.value)
-                            addProperty("languageId", "cpp")
-                            addProperty("version", 1)
-                            addProperty("text", text)
-                        },
-                    )
-                },
-            )
+    ): AnalyzerError? =
+        try {
+            val openedUri = session.openDocument(file)
+            check(openedUri == uri.value) {
+                "clangd session opened unexpected URI: $openedUri"
+            }
             null
         } catch (error: Throwable) {
-            openedDocuments.remove(uri)
             AnalyzerError(
                 code = AnalyzerErrorCode.QUERY_FAILED,
                 message = "Could not open source document in clangd: $file",
@@ -343,7 +315,6 @@ public class ClangdCallHierarchyAdapter(
                 details = error.message,
             )
         }
-    }
 
     private fun parseItem(item: JsonObject): ParsedItem? {
         val name = item.stringOrNull("name")?.takeIf(String::isNotBlank) ?: return null
@@ -514,24 +485,7 @@ public class ClangdCallHierarchyAdapter(
         )
 
     override fun close() {
-        if (!closed.compareAndSet(false, true)) {
-            return
-        }
-        for (uri in openedDocuments.keys) {
-            try {
-                session.notify(
-                    "textDocument/didClose",
-                    JsonObject().apply {
-                        add(
-                            "textDocument",
-                            JsonObject().apply { addProperty("uri", uri.value) },
-                        )
-                    },
-                )
-            } catch (_: Throwable) {
-            }
-        }
-        openedDocuments.clear()
+        closed.set(true)
     }
 
     private data class ParsedItem(
