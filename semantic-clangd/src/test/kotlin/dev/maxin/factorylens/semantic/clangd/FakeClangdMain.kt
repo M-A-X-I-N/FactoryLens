@@ -1,6 +1,7 @@
 package dev.maxin.factorylens.semantic.clangd
 
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -32,7 +33,14 @@ internal object FakeClangdMain {
         val output = BufferedOutputStream(System.out)
         val gson = Gson()
         var pingSequence = 0
+        var prepareSequence = 0
         var shutdownReceived = false
+        val targetCalleeUri = args
+            .firstOrNull { it.startsWith("--target-callee-uri=") }
+            ?.substringAfter('=')
+        val boundaryCalleeUri = args
+            .firstOrNull { it.startsWith("--boundary-callee-uri=") }
+            ?.substringAfter('=')
 
         while (true) {
             val message = readMessage(input) ?: return
@@ -84,6 +92,91 @@ internal object FakeClangdMain {
                     )
                 }
 
+                "textDocument/prepareCallHierarchy" -> {
+                    prepareSequence += 1
+                    val uri = message
+                        .getAsJsonObject("params")
+                        .getAsJsonObject("textDocument")
+                        .get("uri")
+                        .asString
+                    send(
+                        output,
+                        gson,
+                        response(
+                            message,
+                            JsonArray().apply {
+                                add(
+                                    callHierarchyItem(
+                                        name = "RootMethod",
+                                        uri = uri,
+                                        line = 2,
+                                        startCharacter = 4,
+                                        endCharacter = 14,
+                                        opaqueSequence = prepareSequence,
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+                "callHierarchy/outgoingCalls" -> {
+                    val targetUri = targetCalleeUri
+                    val boundaryUri = boundaryCalleeUri
+                    val result = JsonArray()
+                    if (targetUri != null) {
+                        result.add(
+                            outgoingCall(
+                                callee = callHierarchyItem(
+                                    name = "LocalCallee",
+                                    uri = targetUri,
+                                    line = 4,
+                                    startCharacter = 2,
+                                    endCharacter = 13,
+                                    opaqueSequence = 100,
+                                ),
+                                fromRanges = listOf(
+                                    intArrayOf(2, 20, 2, 31),
+                                    intArrayOf(3, 8, 3, 19),
+                                ),
+                            ),
+                        )
+                        result.add(
+                            outgoingCall(
+                                callee = callHierarchyItem(
+                                    name = "LocalCallee",
+                                    uri = targetUri,
+                                    line = 4,
+                                    startCharacter = 2,
+                                    endCharacter = 13,
+                                    opaqueSequence = 101,
+                                ),
+                                fromRanges = listOf(
+                                    intArrayOf(3, 8, 3, 19),
+                                ),
+                            ),
+                        )
+                    }
+                    if (boundaryUri != null) {
+                        result.add(
+                            outgoingCall(
+                                callee = callHierarchyItem(
+                                    name = "EngineBoundary",
+                                    uri = boundaryUri,
+                                    line = 7,
+                                    startCharacter = 1,
+                                    endCharacter = 15,
+                                    opaqueSequence = 200,
+                                ),
+                                fromRanges = listOf(
+                                    intArrayOf(5, 4, 5, 18),
+                                ),
+                            ),
+                        )
+                    }
+                    send(output, gson, response(message, result))
+                }
+
                 "shutdown" -> {
                     shutdownReceived = true
                     send(output, gson, response(message, JsonNull.INSTANCE))
@@ -105,6 +198,80 @@ internal object FakeClangdMain {
             }
         }
     }
+
+    private fun callHierarchyItem(
+        name: String,
+        uri: String,
+        line: Int,
+        startCharacter: Int,
+        endCharacter: Int,
+        opaqueSequence: Int,
+    ): JsonObject =
+        JsonObject().apply {
+            addProperty("name", name)
+            addProperty("kind", 6)
+            addProperty("uri", uri)
+            add(
+                "range",
+                rangeJson(line, 0, line, endCharacter + 8),
+            )
+            add(
+                "selectionRange",
+                rangeJson(line, startCharacter, line, endCharacter),
+            )
+            add(
+                "data",
+                JsonObject().apply {
+                    addProperty("opaqueSequence", opaqueSequence)
+                },
+            )
+        }
+
+    private fun outgoingCall(
+        callee: JsonObject,
+        fromRanges: List<IntArray>,
+    ): JsonObject =
+        JsonObject().apply {
+            add("to", callee)
+            add(
+                "fromRanges",
+                JsonArray().apply {
+                    fromRanges.forEach { coordinates ->
+                        add(
+                            rangeJson(
+                                coordinates[0],
+                                coordinates[1],
+                                coordinates[2],
+                                coordinates[3],
+                            ),
+                        )
+                    }
+                },
+            )
+        }
+
+    private fun rangeJson(
+        startLine: Int,
+        startCharacter: Int,
+        endLine: Int,
+        endCharacter: Int,
+    ): JsonObject =
+        JsonObject().apply {
+            add(
+                "start",
+                JsonObject().apply {
+                    addProperty("line", startLine)
+                    addProperty("character", startCharacter)
+                },
+            )
+            add(
+                "end",
+                JsonObject().apply {
+                    addProperty("line", endLine)
+                    addProperty("character", endCharacter)
+                },
+            )
+        }
 
     private fun response(
         request: JsonObject,
