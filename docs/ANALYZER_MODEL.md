@@ -288,7 +288,7 @@ CYCLE
 DEPTH_LIMIT
 ```
 
-`SHARED` and `CYCLE` are path/presentation facts. They do not modify the underlying semantic node or edge.
+`SHARED` and `CYCLE` are path/presentation facts. They do not modify the underlying semantic node or edge. Bounded semantic discovery is breadth-first so each target symbol is admitted at its shallowest reached depth; the separate tree projection then marks longer alternative paths as shared and ancestor returns as cycles.
 
 Traversal bounds are explicit through `CallGraphTraversalLimits`:
 
