@@ -28,9 +28,15 @@ public data class GraphNode(
     public val symbol: SymbolDescriptor,
 )
 
+public enum class CallEdgeScope {
+    TARGET_LOCAL,
+    BOUNDARY,
+}
+
 public data class CallEdge(
     public val caller: SymbolId,
     public val callee: SymbolId,
+    public val scope: CallEdgeScope,
     public val callSites: List<SourceLocation> = emptyList(),
     public val evidence: List<EvidenceRecord>,
 ) {
