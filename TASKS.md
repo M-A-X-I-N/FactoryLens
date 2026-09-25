@@ -122,7 +122,39 @@ Likewise, none of the following should become an accidental prerequisite for FL-
 - a public third-party adapter SDK;
 - polished graph visualization beyond what the first usable navigation workflow needs.
 
-## 1.9 Maintenance rule
+## 1.9 Draft for later — repository standardization/validation framework
+
+> **Keep-for-later draft only.**
+>
+> This section is intentionally **not scheduled roadmap work** and does not use the status vocabulary from §1.1. The temporary `S1`–`S10` identifiers are placeholders for preserving the idea, not executable task IDs.
+>
+> Do **not** begin, refine, or apply these items merely because they are present here. A human must explicitly pull this draft forward first.
+>
+> The eventual form may be broader than a one-time FactoryLens cleanup. In particular, it may be refined into a reusable or recurring repository-validation/standardization framework, potentially applicable across multiple repositories rather than remaining FactoryLens-specific.
+
+| Draft ID | Candidate validation area | Draft intent / question | Possible eventual completion criterion |
+| --- | --- | --- | --- |
+| **S1** | **Inventory the current repository structure** | Build a concise map of top-level directories, build modules, source sets, tests, docs, scripts, research, CI, and ownership boundaries. Identify exceptional structure before deciding whether it is wrong. | A factual current-state map exists and intentional exceptions are distinguishable from accidental inconsistency. |
+| **S2** | **Define repository naming conventions** | Decide canonical casing/style for modules, directories, language packages/classes/files, docs, scripts, test fixtures, generated state, task-specific tooling, and other recurring artifact categories. | A small convention matrix defines the preferred naming rule and justified exceptions for each major artifact category. |
+| **S3** | **Audit module boundaries and top-level layout** | Review whether production modules, frontend/plugin sources, shared code, tests, scripts, research, and other top-level areas have clear ownership and consistent placement. | The current structure is either deliberately confirmed or specific justified moves/renames are identified. |
+| **S4** | **Audit source/package organization** | Check package/namespace hierarchy, file responsibility, API/model placement, adapter boundaries, test mirroring, and whether files or directories have become structural grab-bags. | Production and test source follow one understandable organization scheme, with concrete exceptions documented. |
+| **S5** | **Audit build/configuration consistency** | Compare module/build configuration, toolchains, dependency declarations, repositories, test setup, duplicated settings, and module-specific exceptions. | Shared versus module-specific configuration is explicit and unnecessary divergence is identified. |
+| **S6** | **Audit docs and navigation structure** | Check root/navigation docs, durable documentation, research indexes, contributor/agent guidance, and cross-links for naming drift, stale ownership, duplication, or misplaced material. | Each durable document has an obvious purpose/owner and navigation reflects the real repository. |
+| **S7** | **Audit tooling, scripts, tests, and research naming** | Review supported tooling, task-specific validation, repository tests, fixtures, and historical research so their location/name makes their role obvious without unnecessarily rewriting historical artifacts. | Supported tooling, test infrastructure, fixtures, and historical research are structurally distinguishable. |
+| **S8** | **Audit repository hygiene and generated-state conventions** | Review ignore rules, local environment files, generated/build output, caches, temporary state, downloaded toolchains, logs, and consistency checks. | Generated/local state has predictable ownership and important repository boundaries are mechanically enforceable where practical. |
+| **S9** | **Apply an agreed structural/naming cleanup** | If the earlier audit justifies changes, perform only the agreed moves, renames, package adjustments, build-reference updates, navigation fixes, and small organizational refactors. | The repository conforms to the agreed conventions without accidental product/behavior changes. |
+| **S10** | **Run full consistency/reference validation** | Search for stale paths/names, broken links, obsolete package/module references, CI/script assumptions, documentation contradictions, and run the repository's full validation surface. | No known stale references remain and the normalized structure is a clean validated baseline. |
+
+If this draft is promoted later, first decide whether it should become:
+
+- a one-time FactoryLens cleanup sequence;
+- a recurring FactoryLens maintenance/audit process;
+- a generic checklist or tool usable across repositories;
+- or some combination of those.
+
+Only after that decision should these placeholder items be converted into real roadmap tasks, tooling, CI checks, or durable policy.
+
+## 1.10 Maintenance rule
 
 When a task is completed:
 
