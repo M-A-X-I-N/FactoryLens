@@ -22,6 +22,9 @@ public data class RootDescriptor(
 ) {
     init {
         require(evidence.isNotEmpty()) { "RootDescriptor.evidence must not be empty." }
+        require(label == null || label.isNotBlank()) {
+            "RootDescriptor.label must be null or non-blank."
+        }
     }
 }
 
