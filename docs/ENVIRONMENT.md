@@ -39,7 +39,7 @@ FACTORYLENS_CLANGD=
 
 `FACTORYLENS_ENGINE_ROOT` is optional. On Windows, supported workspace code otherwise resolves the `FactoryGame.uproject` `EngineAssociation` through the per-user Unreal Engine registry.
 
-`FACTORYLENS_CLANGD` should point to the clangd executable selected for supported semantic analysis. The current FL-B110 compatibility policy accepts clangd major 20 and rejects other majors explicitly because the B3 evidence found clangd 19 missing outgoing call hierarchy and clangd 22 incompatible with the current UE/Clang-19-flavored workspace.
+`FACTORYLENS_CLANGD` should point to the clangd executable selected for supported semantic analysis. The current FL-B110 compatibility policy accepts clangd major 20 and rejects other majors explicitly because the B3 evidence found clangd 19 missing outgoing call hierarchy and clangd 22 incompatible with the current UE/Clang-19-flavored workspace. The task-specific Windows validation harness may bootstrap the official portable clangd 20.1.8 release into ignored `work/factorylens/toolchains/` when no compatible installed binary exists; this does not replace or modify a system LLVM installation.
 
 The migrated B1-B7 research probes use this path to access the real Unreal/SML workspace. Generated compile databases, clangd indexes, logs, and graph output belong under ignored `work/`.
 

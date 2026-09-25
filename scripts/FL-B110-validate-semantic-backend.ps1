@@ -6,6 +6,9 @@ $ErrorActionPreference = "Stop"
 
 $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $RequiredJavaMajor = 25
+$PortableClangdVersion = "20.1.8"
+$PortableClangdSha256 = "717a0700fc660574647468b3d0b67e46a077d27e4da794d9d0c212add6ba6765"
+$PortableClangdUrl = "https://github.com/clangd/clangd/releases/download/20.1.8/clangd-windows-20.1.8.zip"
 
 function Get-JavaMajor {
     param([Parameter(Mandatory = $true)][string]$JavaExecutable)
@@ -58,6 +61,55 @@ function Get-ClangdMajor {
     }
 
     return $null
+}
+
+function Install-PortableClangd20 {
+    $toolchainRoot = Join-Path $RepositoryRoot "work\factorylens\toolchains\clangd-$PortableClangdVersion"
+    $downloadRoot = Join-Path $RepositoryRoot "work\factorylens\downloads"
+    $archivePath = Join-Path $downloadRoot "clangd-windows-$PortableClangdVersion.zip"
+
+    New-Item -ItemType Directory -Force -Path $toolchainRoot | Out-Null
+    New-Item -ItemType Directory -Force -Path $downloadRoot | Out-Null
+
+    $existing = Get-ChildItem -LiteralPath $toolchainRoot -Recurse -Filter "clangd.exe" -File -ErrorAction SilentlyContinue |
+        Where-Object { (Get-ClangdMajor -ClangdExecutable $_.FullName) -eq 20 } |
+        Select-Object -First 1
+    if ($existing) {
+        return $existing.FullName
+    }
+
+    $needDownload = $true
+    if (Test-Path -LiteralPath $archivePath -PathType Leaf) {
+        $hash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($hash -eq $PortableClangdSha256) {
+            $needDownload = $false
+        } else {
+            Remove-Item -LiteralPath $archivePath -Force
+        }
+    }
+
+    if ($needDownload) {
+        Write-Host "clangd 20 not found locally; downloading portable clangd $PortableClangdVersion..."
+        Invoke-WebRequest -Uri $PortableClangdUrl -OutFile $archivePath
+    }
+
+    $hash = (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($hash -ne $PortableClangdSha256) {
+        throw "Portable clangd archive hash mismatch. Expected $PortableClangdSha256 but got $hash."
+    }
+
+    Remove-Item -LiteralPath $toolchainRoot -Recurse -Force
+    New-Item -ItemType Directory -Force -Path $toolchainRoot | Out-Null
+    Expand-Archive -LiteralPath $archivePath -DestinationPath $toolchainRoot -Force
+
+    $clangd = Get-ChildItem -LiteralPath $toolchainRoot -Recurse -Filter "clangd.exe" -File |
+        Where-Object { (Get-ClangdMajor -ClangdExecutable $_.FullName) -eq 20 } |
+        Select-Object -First 1
+    if (-not $clangd) {
+        throw "Portable clangd $PortableClangdVersion was extracted but no clangd major 20 executable was found."
+    }
+
+    return $clangd.FullName
 }
 
 function Find-Clangd20 {
@@ -129,7 +181,9 @@ function Find-Clangd20 {
     }
 
     $checkedText = ($checked | Select-Object -Unique) -join "`n  - "
-    throw "clangd major 20 was not found. Checked:`n  - $checkedText"
+    Write-Host "No installed clangd major 20 was found. Checked:"
+    Write-Host "  - $checkedText"
+    return Install-PortableClangd20
 }
 
 function Find-Java25Home {
