@@ -168,11 +168,26 @@ public class CallGraphSessionTest {
 
         assertTrue(shared.symbol.id in source.queries)
         assertTrue(leaf.symbol.id !in source.queries)
-        assertEquals(
-            2,
-            flatten(traversal.tree)
-                .first { it.node.symbol.id == shared.symbol.id }
-                .depth,
+        val sharedOccurrences = flatten(traversal.tree)
+            .filter { it.node.symbol.id == shared.symbol.id }
+        assertTrue(
+            sharedOccurrences.any {
+                it.depth == 3 &&
+                    it.disposition == CallTreeNodeDisposition.SHARED
+            },
+        )
+        assertTrue(
+            sharedOccurrences.any {
+                it.depth == 2 &&
+                    it.disposition == CallTreeNodeDisposition.EXPANDED
+            },
+        )
+        assertTrue(
+            flatten(traversal.tree).any {
+                it.node.symbol.id == leaf.symbol.id &&
+                    it.depth == 3 &&
+                    it.disposition == CallTreeNodeDisposition.DEPTH_LIMIT
+            },
         )
         assertTrue(
             traversal.nodes.any { it.symbol.id == leaf.symbol.id },
