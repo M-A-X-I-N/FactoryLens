@@ -216,6 +216,20 @@ merely to make analysis work.
 
 FactoryLens-generated indexes, caches, logs, and intermediate analysis state belong in FactoryLens-controlled generated/cache locations.
 
+### Built/generated-state exception policy
+
+Authored source and project-defining configuration remain the strict read-only baseline. Built, generated, or disposable toolchain state may be modified or regenerated when a supported analysis path genuinely requires it, including state previously created by FactoryLens or by the normal Unreal/SML build toolchain.
+
+That permission is **not blanket permission** to mutate `Intermediate/`, generated files, or mod-local build state. Every such occurrence must have its own documented exception that records:
+
+- the exact file/path class or generated-state family involved;
+- which supported FactoryLens operation causes the mutation or regeneration;
+- why the write is necessary or materially simpler/safer than avoiding it;
+- the evidence that the side effect is bounded and does not alter authored/project-defining state;
+- the validation or audit rule that distinguishes the accepted mutation from unexpected writes.
+
+Regenerating disposable build output is acceptable under the same rule when regeneration is the supported toolchain behavior. A previous exception does not automatically authorize a new generated-state write merely because both live under `Intermediate/` or another ignored directory.
+
 ### Narrow UBT bookkeeping exception
 
 Compile-metadata acquisition may invoke UnrealBuildTool against an already-built SML workspace. The supported `GenerateClangDatabase` path uses `-NoExecCodeGenActions`, but UBT still refreshes its existing generated bookkeeping files matching:
@@ -234,7 +248,7 @@ The exception is deliberately narrow:
 - generated headers/source, response files, project configuration, authored source, plugin descriptors, and every other workspace mutation remain unexpected;
 - unexpected mutations must fail the validation path rather than being silently ignored.
 
-This exception exists because real FL-B100 validation showed that `-NoExecCodeGenActions` reduces UBT side effects to UHT timestamp bookkeeping while still producing the real compile view. It must not be generalized into permission for FactoryLens to write arbitrary generated or mod-local files.
+This exception exists because real FL-B100 validation showed that `-NoExecCodeGenActions` reduces UBT side effects to UHT timestamp bookkeeping while still producing the real compile view. It is one concrete exception under the built/generated-state policy above and must not be generalized into permission for FactoryLens to write arbitrary generated or mod-local files.
 
 ## 1.10 Validation specimens
 
