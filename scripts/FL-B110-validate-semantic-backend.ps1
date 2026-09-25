@@ -10,11 +10,49 @@ $PortableClangdVersion = "20.1.8"
 $PortableClangdSha256 = "717a0700fc660574647468b3d0b67e46a077d27e4da794d9d0c212add6ba6765"
 $PortableClangdUrl = "https://github.com/clangd/clangd/releases/download/20.1.8/clangd-windows-20.1.8.zip"
 
+function Get-NativeVersionText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Executable,
+        [Parameter(Mandatory = $true)][string]$Argument
+    )
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $Executable
+    $startInfo.Arguments = $Argument
+    $startInfo.UseShellExecute = $false
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.CreateNoWindow = $true
+
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+
+    if (-not $process.Start()) {
+        throw "Failed to start version probe: $Executable $Argument"
+    }
+
+    try {
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $stderr = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+
+        if ($process.ExitCode -ne 0) {
+            throw "Version probe exited with code $($process.ExitCode): $Executable $Argument"
+        }
+
+        return (($stdout + [Environment]::NewLine + $stderr).Trim())
+    }
+    finally {
+        $process.Dispose()
+    }
+}
+
 function Get-JavaMajor {
     param([Parameter(Mandatory = $true)][string]$JavaExecutable)
 
-    $versionText = (& $JavaExecutable -version 2>&1 | Select-Object -First 1).ToString()
-    if ($versionText -match 'version\s+"(?<major>\d+)') {
+    $versionText = Get-NativeVersionText -Executable $JavaExecutable -Argument "-version"
+    $firstLine = ($versionText -split "\r?\n" | Where-Object { $_ } | Select-Object -First 1)
+    if ($firstLine -match 'version\s+"(?<major>\d+)') {
         return [int]$Matches.major
     }
 
@@ -51,8 +89,9 @@ function Get-ClangdMajor {
     param([Parameter(Mandatory = $true)][string]$ClangdExecutable)
 
     try {
-        $versionText = (& $ClangdExecutable --version 2>&1 | Select-Object -First 1).ToString()
-        if ($versionText -match 'clangd version\s+(?<major>\d+)') {
+        $versionText = Get-NativeVersionText -Executable $ClangdExecutable -Argument "--version"
+        $firstLine = ($versionText -split "\r?\n" | Where-Object { $_ } | Select-Object -First 1)
+        if ($firstLine -match 'clangd version\s+(?<major>\d+)') {
             return [int]$Matches.major
         }
     }
@@ -226,8 +265,10 @@ Write-Host "FactoryLens FL-B110 validation"
 Write-Host "Repository : $RepositoryRoot"
 Write-Host "JAVA_HOME  : $javaHome"
 Write-Host "clangd     : $resolvedClangd"
-& $resolvedClangd --version | Select-Object -First 1
-& (Join-Path $javaHome "bin\java.exe") -version
+$clangdVersionText = Get-NativeVersionText -Executable $resolvedClangd -Argument "--version"
+Write-Host (($clangdVersionText -split "\r?\n" | Where-Object { $_ } | Select-Object -First 1))
+$javaVersionText = Get-NativeVersionText -Executable (Join-Path $javaHome "bin\java.exe") -Argument "-version"
+$javaVersionText -split "\r?\n" | Where-Object { $_ } | ForEach-Object { Write-Host $_ }
 
 Push-Location $RepositoryRoot
 try {
