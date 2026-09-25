@@ -781,7 +781,7 @@ private fun runExternalOverrideCheck(arguments: List<String>): Int {
         }
 
         val discoveredNames = discovery.roots
-            .mapNotNull { root -> root.symbol.qualifiedName }
+            .map { root -> root.symbol.qualifiedName ?: root.symbol.displayName }
             .toSet()
         val requiredPositives = setOf(
             "ARssDataManagerSubsystem::Tick",
