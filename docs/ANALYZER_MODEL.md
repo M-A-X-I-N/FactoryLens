@@ -232,6 +232,48 @@ A root can be semantically confirmed while still being secondary/low-value for t
 
 A root must always contain evidence.
 
+### Root-provider boundary
+
+Individual root mechanisms implement the IDE-independent `RootProvider` seam. A provider owns discovery and provenance for one mechanism and returns a normal `RootDiscovery`; later analyzer composition may merge multiple providers without teaching one provider unrelated framework rules.
+
+The first supported provider is the FL-B150 generic external-override provider. It deliberately treats:
+
+```text
+external virtual override
+  != automatically high-value execution root
+```
+
+Every generic external override therefore begins as:
+
+```text
+RootKind.EXTERNAL_OVERRIDE
+RootPriority.SECONDARY
+```
+
+Framework-specific discovery/enrichment may later provide stronger presentation meaning without invalidating the generic semantic fact.
+
+### Foreground external-override proof
+
+The supported FL-B150 correctness path uses clangd's foreground Clang AST rather than relying on the background index's reverse `OverriddenBy` relation:
+
+```text
+target header
+  -> textDocument/documentSymbol
+  -> class + method declaration
+  -> textDocument/ast
+  -> semantic OverrideAttr / FinalAttr
+  -> textDocument/definition at that attribute
+  -> overridden declaration outside TARGET
+```
+
+Accepted methods are then prepared through the same supported call-hierarchy adapter used by FL-B130. The root's `SymbolId` is therefore immediately usable for outgoing-call expansion rather than belonging to a parallel root-only identity system.
+
+External-base provenance is retained as confirmed `FOREGROUND_OVERRIDE_VERIFICATION` evidence whose location is the concrete external base declaration. Ordinary project-local methods without a semantic override relation are not candidates.
+
+The B6 research showed that project-wide reverse-index discovery is faster and useful but can miss real overrides when clangd index shards are incomplete. FactoryLens may add that path later as an optimization/candidate enumerator, but the first supported B150 provider does not make correctness depend on it.
+
+Provider completeness describes completion of that provider's declared mechanism, not completeness across all possible framework-root families. A clean foreground scan may therefore be `COMPLETE` for generic external overrides while delegate, hook, reflection, or Blueprint providers remain separate mechanisms.
+
 ## 1.7 Graph nodes and call edges
 
 `GraphNode` wraps a `SymbolDescriptor`.
