@@ -230,7 +230,7 @@ Priority is not semantic confidence.
 
 A root can be semantically confirmed while still being secondary/low-value for the default UI. That distinction is required by the MVP rule that generic external overrides should not drown out useful lifecycle/framework roots.
 
-A root must always contain evidence.
+A root must always contain evidence. `RootDescriptor.label` may carry provider-specific human-facing identity (for example `ARssDataManagerSubsystem::Tick`) when the stable semantic `SymbolDescriptor` itself does not contain enough qualification. The label is presentation metadata only and must not change semantic identity.
 
 ### Root-provider boundary
 
@@ -268,7 +268,7 @@ target header
 
 Accepted methods are then prepared through the same supported call-hierarchy adapter used by FL-B130. The root's `SymbolId` is therefore immediately usable for outgoing-call expansion rather than belonging to a parallel root-only identity system.
 
-External-base provenance is retained as confirmed `FOREGROUND_OVERRIDE_VERIFICATION` evidence whose location is the concrete external base declaration. Ordinary project-local methods without a semantic override relation are not candidates.
+External-base provenance is retained as confirmed `FOREGROUND_OVERRIDE_VERIFICATION` evidence whose location is the concrete external base declaration. Accepted generic external bases are dependency-mod, SML, FactoryGame, Unreal Engine, or other external authored source. `TARGET`, `UNKNOWN`, and `GENERATED` declarations are not treated as generic external-framework bases; generated/UHT relationships belong to later generated/reflection enrichment instead of being promoted here. Ordinary project-local methods without a semantic override relation are not candidates.
 
 The B6 research showed that project-wide reverse-index discovery is faster and useful but can miss real overrides when clangd index shards are incomplete. FactoryLens may add that path later as an optimization/candidate enumerator, but the first supported B150 provider does not make correctness depend on it.
 
