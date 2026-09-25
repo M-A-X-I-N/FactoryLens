@@ -245,10 +245,30 @@ The exception is deliberately narrow:
 - FactoryLens must continue auditing the workspace before and after compile-metadata acquisition;
 - the file must exist both before and after the UBT invocation;
 - additions or removals are not accepted by this exception;
-- generated headers/source, response files, project configuration, authored source, plugin descriptors, and every other workspace mutation remain unexpected;
+- generated headers/source, project configuration, authored source, plugin descriptors, and every other workspace mutation remain unexpected unless covered by another separately documented exception below;
 - unexpected mutations must fail the validation path rather than being silently ignored.
 
 This exception exists because real FL-B100 validation showed that `-NoExecCodeGenActions` reduces UBT side effects to UHT timestamp bookkeeping while still producing the real compile view. It is one concrete exception under the built/generated-state policy above and must not be generalized into permission for FactoryLens to write arbitrary generated or mod-local files.
+
+### UBT compile-metadata build-state exception
+
+Switching the supported `GenerateClangDatabase` compiler view between Visual Studio/MSVC and Clang may rewrite existing UnrealBuildTool-owned build state under:
+
+```text
+**/Intermediate/Build/**/*.rsp
+**/Intermediate/Build/**/*.rsp.old
+**/Intermediate/Build/**/Definitions.h
+**/Intermediate/Build/**/Definitions.h.old
+**/Intermediate/Build/**/TargetMetadata.dat
+```
+
+Rewriting an **existing** file in one of those exact generated-state families is an accepted exception during compile-metadata acquisition. Additions and removals are not accepted by this exception, and it does not permit generated `.cpp`/`.h` source, object files, authored source, project configuration, plugin descriptors, or unrelated `Intermediate` files to change.
+
+This exception is grounded in real FL-B110 validation of the Clang compiler view after the workspace had most recently held the MSVC view. The audit observed 4,601 otherwise unexpected changes, all under `Intermediate/Build`: 2,269 `.rsp` files, 2,269 matching `.rsp.old` files, 31 `Definitions.h` files, 31 matching `Definitions.h.old` files, and one `TargetMetadata.dat`. Every response-file pair and every Definitions pair was an exact before/after SHA-256 swap between the active file and its `.old` backup, demonstrating UBT rotating compiler-specific build metadata rather than regenerating authored or UHT source. The UBT invocation still used `-NoExecCodeGenActions`.
+
+A second consecutive Clang-view acquisition on the same workspace then produced only the previously accepted 36 UHT timestamp-bookkeeping rewrites and zero unexpected mutations. That repeatability check confirms the larger 4,601-file event is tied to compiler-view switching rather than ordinary repeated FactoryLens analysis.
+
+The workspace audit must continue to report this class separately from UHT timestamp bookkeeping and must fail on every mutation outside the two documented exception families.
 
 ## 1.10 Validation specimens
 
