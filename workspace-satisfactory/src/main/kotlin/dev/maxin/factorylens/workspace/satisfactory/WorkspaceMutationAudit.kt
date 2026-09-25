@@ -3,12 +3,22 @@ package dev.maxin.factorylens.workspace.satisfactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.BasicFileAttributes
+import java.security.MessageDigest
 import kotlin.io.path.absolute
 
 public data class FileFingerprint(
     public val size: Long,
     public val modifiedMillis: Long,
+    public val sha256: String?,
 )
+
+public enum class WorkspaceMutationKind {
+    ADDED,
+    REMOVED,
+    CONTENT,
+    METADATA_ONLY,
+    UNKNOWN,
+}
 
 public data class WorkspaceSnapshot(
     public val root: Path,
@@ -19,9 +29,12 @@ public data class WorkspaceMutation(
     public val relativePath: String,
     public val before: FileFingerprint?,
     public val after: FileFingerprint?,
+    public val kind: WorkspaceMutationKind,
 )
 
 public object WorkspaceMutationAudit {
+    private const val MAX_HASHED_FILE_BYTES: Long = 1_048_576L
+
     private val excludedDirectoryNames =
         setOf(
             ".git",
@@ -48,6 +61,11 @@ public object WorkspaceMutationAudit {
                         FileFingerprint(
                             size = attributes.size(),
                             modifiedMillis = attributes.lastModifiedTime().toMillis(),
+                            sha256 = if (attributes.size() <= MAX_HASHED_FILE_BYTES) {
+                                sha256(path)
+                            } else {
+                                null
+                            },
                         )
                 }
         }
@@ -78,9 +96,45 @@ public object WorkspaceMutationAudit {
                         relativePath = path,
                         before = previous,
                         after = current,
+                        kind = classify(previous, current),
                     )
                 }
             }
+    }
+
+    private fun classify(
+        before: FileFingerprint?,
+        after: FileFingerprint?,
+    ): WorkspaceMutationKind =
+        when {
+            before == null -> WorkspaceMutationKind.ADDED
+            after == null -> WorkspaceMutationKind.REMOVED
+            before.size != after.size -> WorkspaceMutationKind.CONTENT
+            before.sha256 != null &&
+                after.sha256 != null &&
+                before.sha256 != after.sha256 -> WorkspaceMutationKind.CONTENT
+            before.sha256 != null &&
+                after.sha256 != null &&
+                before.sha256 == after.sha256 -> WorkspaceMutationKind.METADATA_ONLY
+            else -> WorkspaceMutationKind.UNKNOWN
+        }
+
+    private fun sha256(path: Path): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        Files.newInputStream(path).use { input ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) {
+                    break
+                }
+                digest.update(buffer, 0, count)
+            }
+        }
+
+        return digest.digest().joinToString(separator = "") { byte ->
+            (byte.toInt() and 0xff).toString(16).padStart(2, '0')
+        }
     }
 
     private fun hasExcludedDirectory(

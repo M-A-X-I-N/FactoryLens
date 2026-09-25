@@ -174,6 +174,7 @@ private fun runCompileMetadata(arguments: List<String>): Int {
             appendLine("mutation_count=" + mutations.size)
             for (mutation in mutations) {
                 appendLine(mutation.relativePath)
+                appendLine("  kind=" + mutation.kind)
                 appendLine("  before=" + mutation.before)
                 appendLine("  after=" + mutation.after)
             }

@@ -1,6 +1,7 @@
 package dev.maxin.factorylens.workspace.satisfactory
 
 import java.nio.file.Files
+import java.nio.file.attribute.FileTime
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 import kotlin.test.Test
@@ -30,6 +31,48 @@ public class WorkspaceMutationAuditTest {
         assertEquals(
             setOf("Added.txt", "Changed.txt", "Removed.txt"),
             mutations.map { it.relativePath }.toSet(),
+        )
+        assertEquals(
+            mapOf(
+                "Added.txt" to WorkspaceMutationKind.ADDED,
+                "Changed.txt" to WorkspaceMutationKind.CONTENT,
+                "Removed.txt" to WorkspaceMutationKind.REMOVED,
+            ),
+            mutations.associate { it.relativePath to it.kind },
+        )
+    }
+
+    @Test
+    public fun distinguishesMetadataOnlyChangesFromSameSizeContentChanges(): Unit {
+        val root = Files.createTempDirectory("factorylens-audit")
+        val metadataOnly = root.resolve("MetadataOnly.txt")
+        val sameSizeContent = root.resolve("SameSizeContent.txt")
+        metadataOnly.writeText("unchanged")
+        sameSizeContent.writeText("before")
+
+        val before = WorkspaceMutationAudit.capture(root)
+        Files.setLastModifiedTime(
+            metadataOnly,
+            FileTime.fromMillis(Files.getLastModifiedTime(metadataOnly).toMillis() + 10_000),
+        )
+        sameSizeContent.writeText("after!")
+
+        val mutations = WorkspaceMutationAudit.diff(
+            before,
+            WorkspaceMutationAudit.capture(root),
+        ).associateBy { it.relativePath }
+
+        assertEquals(
+            WorkspaceMutationKind.METADATA_ONLY,
+            mutations.getValue("MetadataOnly.txt").kind,
+        )
+        assertEquals(
+            WorkspaceMutationKind.CONTENT,
+            mutations.getValue("SameSizeContent.txt").kind,
+        )
+        assertEquals(
+            mutations.getValue("MetadataOnly.txt").before?.sha256,
+            mutations.getValue("MetadataOnly.txt").after?.sha256,
         )
     }
 
