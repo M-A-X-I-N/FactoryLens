@@ -57,7 +57,9 @@ FactoryEditor Win64 Development
 
 Real Windows validation on 2026-09-25 produced 2,175 translation-unit entries, matching the migrated B1 feasibility baseline.
 
-The pre/post mutation audit found that `-NoExecCodeGenActions` removes the broader response-file/code-generation churn observed during the first validation pass. The remaining 36 mutations were all existing `**/Intermediate/Build/**/UHT/Timestamp` bookkeeping files: 19 changed bookkeeping contents and 17 changed filesystem metadata only. That exact existing-file rewrite is the narrow exception documented in [`MVP_CONTRACT.md`](MVP_CONTRACT.md); every other workspace mutation remains unexpected.
+The pre/post mutation audit found that `-NoExecCodeGenActions` removes the broader response-file/code-generation churn observed during the first validation pass when the requested compiler view matches the workspace's current UBT build state. The remaining 36 mutations were all existing `**/Intermediate/Build/**/UHT/Timestamp` bookkeeping files: 19 changed bookkeeping contents and 17 changed filesystem metadata only.
+
+A later real FL-B110 validation switched that same workspace from its MSVC compile view to the Clang compile view. UBT then rotated 4,601 additional existing generated build-state files under `Intermediate/Build`: 2,269 `.rsp` + 2,269 `.rsp.old`, 31 `Definitions.h` + 31 `Definitions.h.old`, and one `TargetMetadata.dat`. Every response-file and Definitions active/backup pair swapped hashes exactly, while UBT still ran with `-NoExecCodeGenActions`. A second consecutive Clang-view acquisition immediately afterward returned to the stable 36 accepted UHT bookkeeping rewrites with zero unexpected mutations. The exact existing-file families are therefore a second separately documented exception in [`MVP_CONTRACT.md`](MVP_CONTRACT.md); mutations outside the documented exception families remain unexpected.
 
 ## 1.3 clangd
 
@@ -88,6 +90,8 @@ work/factorylens/compile-metadata/clang/.cache/clangd/index/
 next to the compilation database, keeping persistent index state under FactoryLens-controlled ignored `work/`. This location follows clangd's documented background-index cache behavior: <https://clangd.llvm.org/design/indexing>.
 
 Backend version and capability mismatches are explicit startup failures rather than degraded empty analysis. Raw JSON-RPC/LSP messages remain internal to `semantic-clangd`; product/domain callers must not depend on them.
+
+Real Windows FL-B110 validation on 2026-09-25 used clangd 20.1.8 from the WinGet link and the 2,175-entry UBT Clang compile database. Supported FactoryLens code initialized the backend to `READY`, observed `callHierarchyProvider=true`, reported the configured background-index cache under FactoryLens `work/`, and shut the same process down cleanly to `STOPPED`. The task-specific validation script exercised this path without invoking any migrated BX research probe.
 
 ## 1.4 Rider
 
