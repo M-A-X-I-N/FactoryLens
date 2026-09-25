@@ -32,11 +32,14 @@ Current keys:
 ```text
 SML_PROJECT_ROOT=
 FACTORYLENS_ENGINE_ROOT=
+FACTORYLENS_CLANGD=
 ```
 
 `SML_PROJECT_ROOT` should point to the SML Starter Project root containing `FactoryGame.uproject`.
 
 `FACTORYLENS_ENGINE_ROOT` is optional. On Windows, supported workspace code otherwise resolves the `FactoryGame.uproject` `EngineAssociation` through the per-user Unreal Engine registry.
+
+`FACTORYLENS_CLANGD` should point to the clangd executable selected for supported semantic analysis. The current FL-B110 compatibility policy accepts clangd major 20 and rejects other majors explicitly because the B3 evidence found clangd 19 missing outgoing call hierarchy and clangd 22 incompatible with the current UE/Clang-19-flavored workspace.
 
 The migrated B1-B7 research probes use this path to access the real Unreal/SML workspace. Generated compile databases, clangd indexes, logs, and graph output belong under ignored `work/`.
 
@@ -65,6 +68,26 @@ The feasibility study found clangd behavior to be version-sensitive:
 - clangd 20.1.8 produced the successful semantic call-map results.
 
 Do not translate that experiment into a permanent "20.1.8 forever" product rule. Future supported tooling should pin/test a compatible backend against the Satisfactory/UE/SML baseline it claims to support.
+
+### Supported FL-B110 session behavior
+
+The supported semantic backend starts one persistent external clangd process for a configured workspace/compile database, performs the LSP initialization handshake once, verifies required call-hierarchy capability, and reuses that process for subsequent semantic requests until the session is closed or restarted by a later analyzer layer.
+
+The default B110 validation input is the B3-proven Clang compiler view:
+
+```text
+work/factorylens/compile-metadata/clang/compile_commands.json
+```
+
+clangd starts with background indexing enabled. Its on-disk background index is therefore retained under:
+
+```text
+work/factorylens/compile-metadata/clang/.cache/clangd/index/
+```
+
+next to the compilation database, keeping persistent index state under FactoryLens-controlled ignored `work/`. This location follows clangd's documented background-index cache behavior: <https://clangd.llvm.org/design/indexing>.
+
+Backend version and capability mismatches are explicit startup failures rather than degraded empty analysis. Raw JSON-RPC/LSP messages remain internal to `semantic-clangd`; product/domain callers must not depend on them.
 
 ## 1.4 Rider
 

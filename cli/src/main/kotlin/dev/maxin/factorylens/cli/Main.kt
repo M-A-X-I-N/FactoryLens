@@ -1,7 +1,10 @@
 package dev.maxin.factorylens.cli
 
 import dev.maxin.factorylens.core.FactoryLensProduct
+import dev.maxin.factorylens.semantic.clangd.ClangdBackendConfig
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendDescriptor
+import dev.maxin.factorylens.semantic.clangd.ClangdBackendSessionFactory
+import dev.maxin.factorylens.semantic.clangd.ClangdBackendStartResult
 import dev.maxin.factorylens.workspace.satisfactory.CompileMetadataResult
 import dev.maxin.factorylens.workspace.satisfactory.EngineResolutionResult
 import dev.maxin.factorylens.workspace.satisfactory.SatisfactoryWorkspaceDiscovery
@@ -21,6 +24,7 @@ import kotlin.system.exitProcess
 public fun main(args: Array<String>) {
     val exitCode = when (args.firstOrNull()) {
         "compile-metadata" -> runCompileMetadata(args.drop(1))
+        "backend-check" -> runBackendCheck(args.drop(1))
         null, "help", "--help", "-h" -> {
             printHelp()
             0
@@ -43,6 +47,7 @@ private fun printHelp(): Unit {
     println()
     println("Commands:")
     println("  compile-metadata [options]  Discover an SML workspace and generate UBT compile metadata.")
+    println("  backend-check [options]     Start, initialize, report, and cleanly stop clangd.")
     println()
     println("compile-metadata options:")
     println("  --sml-root PATH       SML Starter Project root; defaults to SML_PROJECT_ROOT/.env.")
@@ -50,10 +55,16 @@ private fun printHelp(): Unit {
     println("  --output PATH         Output directory outside the analyzed workspace.")
     println("  --compiler msvc|clang UBT compiler view; default: msvc.")
     println("  --skip-audit          Skip pre/post workspace mutation audit.")
+    println()
+    println("backend-check options:")
+    println("  --sml-root PATH       SML Starter Project root; defaults to SML_PROJECT_ROOT/.env.")
+    println("  --clangd PATH         clangd executable; defaults to FACTORYLENS_CLANGD/.env.")
+    println("  --compile-db PATH     Directory containing compile_commands.json; default: work/.../clang.")
+    println("  --log PATH            clangd stderr log; default: work/factorylens/semantic-clangd/clangd-stderr.log.")
 }
 
 private fun runCompileMetadata(arguments: List<String>): Int {
-    val options = parseOptions(arguments) ?: return 2
+    val options = parseCompileMetadataOptions(arguments) ?: return 2
     val cwd = Path.of("").absolute().normalize()
     val dotenv = readDotEnv(cwd.resolve(".env"))
 
@@ -228,12 +239,105 @@ private fun runCompileMetadata(arguments: List<String>): Int {
     return 0
 }
 
+private fun runBackendCheck(arguments: List<String>): Int {
+    val options = parseBackendCheckOptions(arguments) ?: return 2
+    val cwd = Path.of("").absolute().normalize()
+    val dotenv = readDotEnv(cwd.resolve(".env"))
+
+    val smlRootText =
+        options.values["--sml-root"] ?:
+        System.getenv("SML_PROJECT_ROOT") ?:
+        dotenv["SML_PROJECT_ROOT"]
+    if (smlRootText.isNullOrBlank()) {
+        System.err.println(
+            "SML project root is required via --sml-root, SML_PROJECT_ROOT, or repository .env.",
+        )
+        return 2
+    }
+
+    val smlRoot = resolveConfiguredPath(cwd, smlRootText)
+    val workspace = when (val result = SatisfactoryWorkspaceDiscovery.discover(smlRoot)) {
+        is WorkspaceDiscoveryResult.Success -> result.workspace
+        is WorkspaceDiscoveryResult.Failure -> {
+            System.err.println("Workspace discovery failed: " + result.message)
+            return 2
+        }
+    }
+
+    val clangdText =
+        options.values["--clangd"] ?:
+        System.getenv("FACTORYLENS_CLANGD") ?:
+        dotenv["FACTORYLENS_CLANGD"]
+    if (clangdText.isNullOrBlank()) {
+        System.err.println(
+            "clangd is required via --clangd, FACTORYLENS_CLANGD, or repository .env.",
+        )
+        return 2
+    }
+
+    val clangd = resolveConfiguredPath(cwd, clangdText)
+    val compileDatabase = options.values["--compile-db"]
+        ?.let { resolveConfiguredPath(cwd, it) }
+        ?: cwd.resolve("work/factorylens/compile-metadata/clang")
+    val logPath = options.values["--log"]
+        ?.let { resolveConfiguredPath(cwd, it) }
+        ?: cwd.resolve("work/factorylens/semantic-clangd/clangd-stderr.log")
+
+    val start = ClangdBackendSessionFactory.start(
+        ClangdBackendConfig(
+            executable = clangd,
+            compileCommandsDirectory = compileDatabase,
+            workspaceRoot = workspace.root,
+            stderrLog = logPath,
+        ),
+    )
+
+    val session = when (start) {
+        is ClangdBackendStartResult.Success -> start.session
+        is ClangdBackendStartResult.Failure -> {
+            System.err.println("status=failure")
+            System.err.println("failure_code=" + start.error.code)
+            System.err.println("message=" + start.error.message)
+            if (start.error.details != null) {
+                System.err.println("details=" + start.error.details)
+            }
+            return 2
+        }
+    }
+
+    val running = session.state()
+    println("status=success")
+    println("workspace=" + workspace.root)
+    println("clangd=" + clangd)
+    println("clangd_version=" + session.version.raw.lineSequence().first())
+    println("clangd_major=" + session.version.major)
+    println("process_id=" + session.processId)
+    println("compile_database=" + compileDatabase.resolve("compile_commands.json"))
+    println("background_index_cache=" + compileDatabase.resolve(".cache/clangd/index"))
+    println("backend_status=" + running.status)
+    println("background_index=" + running.backgroundIndex)
+    println("call_hierarchy_provider=" + running.capabilities?.callHierarchyProvider)
+    println("stderr_log=" + logPath)
+
+    session.close()
+    println("shutdown_status=" + session.state().status)
+    return 0
+}
+
+private fun resolveConfiguredPath(
+    base: Path,
+    value: String,
+): Path {
+    val path = Path.of(value)
+    return if (path.isAbsolute) path.normalize() else base.resolve(path).normalize()
+}
+
 private data class ParsedOptions(
     val values: Map<String, String>,
     val flags: Set<String>,
 )
 
-private fun parseOptions(arguments: List<String>): ParsedOptions? {
+private fun parseCompileMetadataOptions(arguments: List<String>): ParsedOptions? {
     val values = linkedMapOf<String, String>()
     val flags = linkedSetOf<String>()
     val valueOptions = setOf(
@@ -270,6 +374,39 @@ private fun parseOptions(arguments: List<String>): ParsedOptions? {
     }
 
     return ParsedOptions(values = values, flags = flags)
+}
+
+private fun parseBackendCheckOptions(arguments: List<String>): ParsedOptions? {
+    val values = linkedMapOf<String, String>()
+    val valueOptions = setOf(
+        "--sml-root",
+        "--clangd",
+        "--compile-db",
+        "--log",
+    )
+
+    var index = 0
+    while (index < arguments.size) {
+        val argument = arguments[index]
+        if (argument !in valueOptions) {
+            System.err.println("Unknown backend-check option: " + argument)
+            return null
+        }
+
+        val value = arguments.getOrNull(index + 1)
+        if (value == null || value.startsWith("--")) {
+            System.err.println("Missing value for " + argument)
+            return null
+        }
+
+        values[argument] = value
+        index += 2
+    }
+
+    return ParsedOptions(
+        values = values,
+        flags = emptySet(),
+    )
 }
 
 private fun readDotEnv(path: Path): Map<String, String> {
