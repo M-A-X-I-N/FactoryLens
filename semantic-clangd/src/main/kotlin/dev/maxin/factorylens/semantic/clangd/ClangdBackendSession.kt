@@ -7,6 +7,7 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -18,6 +19,7 @@ public class ClangdBackendSession internal constructor(
     public val version: ClangdVersion,
 ) : AutoCloseable {
     private val closing = AtomicBoolean(false)
+    private val openedDocuments = ConcurrentHashMap<String, Unit>()
     private val state = AtomicReference(
         ClangdBackendState(
             status = ClangdBackendStatus.STARTING,
@@ -115,6 +117,47 @@ public class ClangdBackendSession internal constructor(
         connection.notify(method, params)
     }
 
+    internal fun openDocument(file: Path): String {
+        val normalized = file.toAbsolutePath().normalize()
+        require(Files.isRegularFile(normalized)) {
+            "clangd document is not a regular file: $normalized"
+        }
+
+        val uri = normalized.toUri().toString()
+        if (openedDocuments.putIfAbsent(uri, Unit) != null) {
+            return uri
+        }
+
+        val text = try {
+            Files.readString(normalized, StandardCharsets.UTF_8).removePrefix("\uFEFF")
+        } catch (error: Throwable) {
+            openedDocuments.remove(uri)
+            throw error
+        }
+
+        try {
+            notify(
+                "textDocument/didOpen",
+                JsonObject().apply {
+                    add(
+                        "textDocument",
+                        JsonObject().apply {
+                            addProperty("uri", uri)
+                            addProperty("languageId", "cpp")
+                            addProperty("version", 1)
+                            addProperty("text", text)
+                        },
+                    )
+                },
+            )
+        } catch (error: Throwable) {
+            openedDocuments.remove(uri)
+            throw error
+        }
+
+        return uri
+    }
+
     private fun handleNotification(message: JsonObject) {
         if (message.get("method")?.asString != "$/progress") {
             return
@@ -186,6 +229,24 @@ public class ClangdBackendSession internal constructor(
 
         try {
             if (process.isAlive) {
+                for (uri in openedDocuments.keys) {
+                    try {
+                        connection.notify(
+                            "textDocument/didClose",
+                            JsonObject().apply {
+                                add(
+                                    "textDocument",
+                                    JsonObject().apply {
+                                        addProperty("uri", uri)
+                                    },
+                                )
+                            },
+                        )
+                    } catch (_: Throwable) {
+                    }
+                }
+                openedDocuments.clear()
+
                 try {
                     connection.request("shutdown", JsonObject())
                 } catch (_: Throwable) {
