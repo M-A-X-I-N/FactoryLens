@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.JavaExec
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -22,4 +23,8 @@ kotlin {
 
 application {
     mainClass.set("dev.maxin.factorylens.cli.MainKt")
+}
+
+tasks.named<JavaExec>("run") {
+    workingDir(rootProject.projectDir)
 }

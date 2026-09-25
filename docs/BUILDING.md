@@ -101,6 +101,8 @@ or on Windows:
 
 FL-B170 will turn this scaffold into the real analyzer integration harness.
 
+The Gradle `:cli:run` task uses the repository root as its working directory so repository-local `.env` configuration and generated `work/` state resolve consistently rather than under `cli/`.
+
 ### Rider development sandbox
 
 Once the local machine has the required environment and the plugin reaches the relevant implementation stage:
