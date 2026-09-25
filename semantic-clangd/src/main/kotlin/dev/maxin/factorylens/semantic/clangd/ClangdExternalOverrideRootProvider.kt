@@ -137,7 +137,7 @@ public class ClangdExternalOverrideRootProvider(
                     .map(RootAccumulator::descriptor)
                     .sortedWith(
                         compareBy(
-                            { root -> root.symbol.qualifiedName ?: root.symbol.displayName },
+                            { root -> root.label ?: root.symbol.qualifiedName ?: root.symbol.displayName },
                             { root -> root.symbol.id.value },
                         ),
                     ),
@@ -275,7 +275,7 @@ public class ClangdExternalOverrideRootProvider(
 
                     for (location in definitions) {
                         val realm = realmClassifier.classify(location.uri)
-                        if (realm != SourceRealm.TARGET && realm != SourceRealm.UNKNOWN) {
+                        if (isSupportedExternalBaseRealm(realm)) {
                             externalBases += ExternalBase(
                                 location = location,
                                 realm = realm,
@@ -319,7 +319,10 @@ public class ClangdExternalOverrideRootProvider(
 
                 val qualifiedName = "$className::$methodName"
                 val accumulator = roots.getOrPut(symbol.id) {
-                    RootAccumulator(symbol)
+                    RootAccumulator(
+                        symbol = symbol,
+                        label = qualifiedName,
+                    )
                 }
                 externalBases.forEach { base ->
                     accumulator.addEvidence(
@@ -363,6 +366,13 @@ public class ClangdExternalOverrideRootProvider(
 
     private fun isHeader(path: Path): Boolean =
         path.extension.lowercase() in setOf("h", "hh", "hpp", "hxx")
+
+    private fun isSupportedExternalBaseRealm(realm: SourceRealm): Boolean =
+        realm == SourceRealm.DEPENDENCY_MOD ||
+            realm == SourceRealm.SML ||
+            realm == SourceRealm.FACTORY_GAME ||
+            realm == SourceRealm.UNREAL_ENGINE ||
+            realm == SourceRealm.OTHER_EXTERNAL
 
     private fun classSymbols(symbols: JsonArray): List<JsonObject> {
         val result = mutableListOf<JsonObject>()
@@ -638,6 +648,7 @@ public class ClangdExternalOverrideRootProvider(
 
     private data class RootAccumulator(
         val symbol: SymbolDescriptor,
+        val label: String,
         val evidence: MutableList<EvidenceRecord> = mutableListOf(),
     ) {
         fun addEvidence(record: EvidenceRecord) {
@@ -653,6 +664,7 @@ public class ClangdExternalOverrideRootProvider(
                 kind = RootKind.EXTERNAL_OVERRIDE,
                 priority = RootPriority.SECONDARY,
                 evidence = evidence.toList(),
+                label = label,
             )
     }
 }
