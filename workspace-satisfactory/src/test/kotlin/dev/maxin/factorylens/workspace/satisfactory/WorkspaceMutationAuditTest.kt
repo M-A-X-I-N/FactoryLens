@@ -147,6 +147,85 @@ public class WorkspaceMutationAuditTest {
     }
 
     @Test
+    public fun acceptsOnlyExistingUbtCompileMetadataBuildStateRewrites(): Unit {
+        val before = FileFingerprint(
+            size = 100,
+            modifiedMillis = 1,
+            sha256 = "before",
+        )
+        val after = FileFingerprint(
+            size = 100,
+            modifiedMillis = 2,
+            sha256 = "after",
+        )
+
+        val acceptedPaths = listOf(
+            "Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\FactoryEditor\\FactoryEditor.Shared.rsp",
+            "Mods\\FicsitWiremod\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\FicsitWiremod\\Wiremod.cpp.obj.rsp.old",
+            "Mods\\GameFeatures\\RSS\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\RSS\\Definitions.h",
+            "Mods\\SML\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\SML\\Definitions.h.old",
+            "Intermediate\\Build\\Win64\\x64\\FactoryEditor\\Development\\TargetMetadata.dat",
+        )
+        for (path in acceptedPaths) {
+            assertTrue(
+                WorkspaceMutationAudit.isAcceptedUbtCompileMetadataBuildState(
+                    WorkspaceMutation(
+                        relativePath = path,
+                        before = before,
+                        after = after,
+                        kind = WorkspaceMutationKind.CONTENT,
+                    ),
+                ),
+            )
+        }
+
+        assertTrue(
+            WorkspaceMutationAudit.isAcceptedUbtCompileMetadataBuildState(
+                WorkspaceMutation(
+                    relativePath =
+                        "Intermediate\\Build\\Win64\\x64\\FactoryEditor\\Development\\TargetMetadata.dat",
+                    before = before.copy(sha256 = null),
+                    after = after.copy(sha256 = null),
+                    kind = WorkspaceMutationKind.UNKNOWN,
+                ),
+            ),
+        )
+        assertTrue(
+            !WorkspaceMutationAudit.isAcceptedUbtCompileMetadataBuildState(
+                WorkspaceMutation(
+                    relativePath =
+                        "Mods\\FicsitWiremod\\Source\\FicsitWiremod\\Private\\Wiremod.cpp.obj.rsp",
+                    before = before,
+                    after = after,
+                    kind = WorkspaceMutationKind.CONTENT,
+                ),
+            ),
+        )
+        assertTrue(
+            !WorkspaceMutationAudit.isAcceptedUbtCompileMetadataBuildState(
+                WorkspaceMutation(
+                    relativePath =
+                        "Mods\\FicsitWiremod\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\FicsitWiremod\\Wiremod.cpp.obj.rsp",
+                    before = null,
+                    after = after,
+                    kind = WorkspaceMutationKind.ADDED,
+                ),
+            ),
+        )
+        assertTrue(
+            !WorkspaceMutationAudit.isAcceptedUbtCompileMetadataBuildState(
+                WorkspaceMutation(
+                    relativePath =
+                        "Mods\\FicsitWiremod\\Intermediate\\Build\\Win64\\x64\\UnrealEditor\\Development\\FicsitWiremod\\Module.FicsitWiremod.gen.cpp",
+                    before = before,
+                    after = after,
+                    kind = WorkspaceMutationKind.CONTENT,
+                ),
+            ),
+        )
+    }
+
+    @Test
     public fun keepsIntermediateInAuditButExcludesKnownNoiseDirectories(): Unit {
         val root = Files.createTempDirectory("factorylens-audit")
         root.resolve("Intermediate").createDirectories()
