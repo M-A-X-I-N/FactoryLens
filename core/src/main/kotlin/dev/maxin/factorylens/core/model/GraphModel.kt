@@ -18,6 +18,7 @@ public data class RootDescriptor(
     public val kind: RootKind,
     public val priority: RootPriority,
     public val evidence: List<EvidenceRecord>,
+    public val label: String? = null,
 ) {
     init {
         require(evidence.isNotEmpty()) { "RootDescriptor.evidence must not be empty." }
