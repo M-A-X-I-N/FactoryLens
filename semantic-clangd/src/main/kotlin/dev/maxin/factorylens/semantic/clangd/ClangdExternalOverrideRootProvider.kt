@@ -318,15 +318,8 @@ public class ClangdExternalOverrideRootProvider(
                 }
 
                 val qualifiedName = "$className::$methodName"
-                val rootSymbol =
-                    if (symbol.qualifiedName == qualifiedName) {
-                        symbol
-                    } else {
-                        symbol.copy(qualifiedName = qualifiedName)
-                    }
-
-                val accumulator = roots.getOrPut(rootSymbol.id) {
-                    RootAccumulator(rootSymbol)
+                val accumulator = roots.getOrPut(symbol.id) {
+                    RootAccumulator(symbol)
                 }
                 externalBases.forEach { base ->
                     accumulator.addEvidence(
@@ -337,7 +330,7 @@ public class ClangdExternalOverrideRootProvider(
                                 "$qualifiedName semantically overrides a declaration " +
                                 "outside the analysis target (${base.realm}).",
                             location = base.location,
-                            relatedSymbols = listOf(rootSymbol.id),
+                            relatedSymbols = listOf(symbol.id),
                         ),
                     )
                 }
