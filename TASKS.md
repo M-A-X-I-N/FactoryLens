@@ -69,8 +69,8 @@ This task is deliberately **non-blocking** for product development.
 
 | ID | Status | Task | Done when |
 | --- | --- | --- | --- |
-| **FL-B100** | **ACTIVE** | Promote Satisfactory/SML workspace discovery and UBT compile metadata acquisition. | Supported code can identify/configure a Satisfactory SML workspace and obtain the real analysis compile view without invoking a migrated research script manually. |
-| **FL-B110** | **READY** | Implement a persistent semantic-backend session. | FactoryLens can start/connect to the chosen clangd/Clang backend, initialize against the workspace, reuse the process/index across queries, expose compatibility failures clearly, and shut down cleanly. |
+| **FL-B100** | **DONE** | Promote Satisfactory/SML workspace discovery and UBT compile metadata acquisition. | Supported code can identify/configure a Satisfactory SML workspace and obtain the real analysis compile view without invoking a migrated research script manually. |
+| **FL-B110** | **NEXT** | Implement a persistent semantic-backend session. | FactoryLens can start/connect to the chosen clangd/Clang backend, initialize against the workspace, reuse the process/index across queries, expose compatibility failures clearly, and shut down cleanly. |
 | **FL-B120** | **READY** | Implement project/source boundary classification. | The analyzer can distinguish the target mod/project from Unreal Engine, SML, FactoryGame, dependency mods, generated code, and other external boundaries well enough for project-local traversal/filtering. |
 | **FL-B130** | **READY** | Implement supported outgoing-call expansion. | Given one project method, the analyzer returns semantically resolved project-local outgoing edges with stable identities, explicit boundary edges, and honest source-location/protocol limitations. |
 | **FL-B140** | **READY** | Implement graph traversal, deduplication, cycles, and in-session caching. | Lazy traversal can reuse nodes/edges, mark cycles, merge shared paths, enforce bounds, and avoid re-querying unchanged expansions during a session. |
