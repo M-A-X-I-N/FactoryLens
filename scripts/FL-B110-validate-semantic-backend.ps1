@@ -1,6 +1,7 @@
 param(
     [string]$Clangd,
-    [string]$EnvironmentOutput
+    [string]$EnvironmentOutput,
+    [switch]$EnvironmentOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -290,6 +291,10 @@ $clangdVersionText = Get-NativeVersionText -Executable $resolvedClangd -Argument
 Write-Host (($clangdVersionText -split "\r?\n" | Where-Object { $_ } | Select-Object -First 1))
 $javaVersionText = Get-NativeVersionText -Executable (Join-Path $javaHome "bin\java.exe") -Argument "-version"
 $javaVersionText -split "\r?\n" | Where-Object { $_ } | ForEach-Object { Write-Host $_ }
+
+if ($EnvironmentOnly) {
+    return
+}
 
 Push-Location $RepositoryRoot
 try {
