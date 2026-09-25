@@ -765,21 +765,6 @@ private fun runExternalOverrideCheck(arguments: List<String>): Int {
             )
         }
 
-        discovery.roots.forEach { root ->
-            val bases = root.evidence
-                .mapNotNull { evidence -> evidence.location?.uri?.value }
-                .distinct()
-                .joinToString(",")
-            println(
-                "root=" +
-                    (root.label ?: root.symbol.qualifiedName ?: root.symbol.displayName) +
-                    "|" +
-                    root.priority +
-                    "|realm=" + root.symbol.realm +
-                    "|bases=" + bases,
-            )
-        }
-
         val discoveredNames = discovery.roots
             .map { root -> root.label ?: root.symbol.qualifiedName ?: root.symbol.displayName }
             .toSet()
@@ -808,15 +793,58 @@ private fun runExternalOverrideCheck(arguments: List<String>): Int {
                         evidence.location != null
                 }
         }
+        val unsupportedBaseEvidence = discovery.roots.flatMap { root ->
+            root.evidence.mapNotNull { evidence ->
+                val location = evidence.location ?: return@mapNotNull null
+                val realm = classifier.classify(location.uri)
+                if (
+                    realm == dev.maxin.factorylens.core.model.SourceRealm.DEPENDENCY_MOD ||
+                    realm == dev.maxin.factorylens.core.model.SourceRealm.SML ||
+                    realm == dev.maxin.factorylens.core.model.SourceRealm.FACTORY_GAME ||
+                    realm == dev.maxin.factorylens.core.model.SourceRealm.UNREAL_ENGINE ||
+                    realm == dev.maxin.factorylens.core.model.SourceRealm.OTHER_EXTERNAL
+                ) {
+                    null
+                } else {
+                    (root.label ?: root.symbol.displayName) + ":" + realm
+                }
+            }
+        }
         val pass =
             missingPositives.isEmpty() &&
                 unexpectedNegatives.isEmpty() &&
-                evidenceComplete
+                evidenceComplete &&
+                unsupportedBaseEvidence.isEmpty()
 
         println("required_positive_count=" + requiredPositives.size)
+        requiredPositives.sorted().forEach { expected ->
+            val matches = discovery.roots.filter { root ->
+                (root.label ?: root.symbol.qualifiedName ?: root.symbol.displayName) == expected
+            }
+            val bases = matches
+                .flatMap { root -> root.evidence }
+                .mapNotNull { evidence -> evidence.location?.uri?.value }
+                .distinct()
+                .joinToString(",")
+            println(
+                "positive_control=" + expected +
+                    "|count=" + matches.size +
+                    "|bases=" + bases,
+            )
+        }
+        requiredNegatives.sorted().forEach { expected ->
+            val count = discovery.roots.count { root ->
+                (root.label ?: root.symbol.qualifiedName ?: root.symbol.displayName) == expected
+            }
+            println("negative_control=" + expected + "|count=" + count)
+        }
         println("missing_positives=" + missingPositives.sorted().joinToString(","))
         println("unexpected_negatives=" + unexpectedNegatives.sorted().joinToString(","))
         println("all_roots_have_external_base_evidence=" + evidenceComplete)
+        println(
+            "unsupported_base_evidence=" +
+                unsupportedBaseEvidence.distinct().sorted().joinToString(","),
+        )
         println("b150_pass_condition=" + pass)
         println("stderr_log=" + logPath)
         return if (pass) 0 else 3
