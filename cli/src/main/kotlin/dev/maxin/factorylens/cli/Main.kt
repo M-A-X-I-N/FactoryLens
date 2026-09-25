@@ -772,7 +772,7 @@ private fun runExternalOverrideCheck(arguments: List<String>): Int {
                 .joinToString(",")
             println(
                 "root=" +
-                    (root.symbol.qualifiedName ?: root.symbol.displayName) +
+                    (root.label ?: root.symbol.qualifiedName ?: root.symbol.displayName) +
                     "|" +
                     root.priority +
                     "|realm=" + root.symbol.realm +
@@ -781,7 +781,7 @@ private fun runExternalOverrideCheck(arguments: List<String>): Int {
         }
 
         val discoveredNames = discovery.roots
-            .map { root -> root.symbol.qualifiedName ?: root.symbol.displayName }
+            .map { root -> root.label ?: root.symbol.qualifiedName ?: root.symbol.displayName }
             .toSet()
         val requiredPositives = setOf(
             "ARssDataManagerSubsystem::Tick",
