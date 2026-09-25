@@ -1,5 +1,6 @@
 param(
-    [string]$Clangd
+    [string]$Clangd,
+    [string]$EnvironmentOutput
 )
 
 $ErrorActionPreference = "Stop"
@@ -260,6 +261,26 @@ $env:Path = "$javaHome\bin;$env:Path"
 
 $resolvedClangd = Find-Clangd20 -ExplicitPath $Clangd
 $env:FACTORYLENS_CLANGD = $resolvedClangd
+
+if ($EnvironmentOutput) {
+    $environmentOutputPath = [Environment]::ExpandEnvironmentVariables($EnvironmentOutput)
+    if (-not [System.IO.Path]::IsPathRooted($environmentOutputPath)) {
+        $environmentOutputPath = Join-Path $RepositoryRoot $environmentOutputPath
+    }
+
+    $environmentOutputPath = [System.IO.Path]::GetFullPath($environmentOutputPath)
+    $environmentOutputParent = Split-Path $environmentOutputPath -Parent
+    if ($environmentOutputParent) {
+        New-Item -ItemType Directory -Force -Path $environmentOutputParent | Out-Null
+    }
+
+    @{
+        JAVA_HOME = $javaHome
+        FACTORYLENS_CLANGD = $resolvedClangd
+    } |
+        ConvertTo-Json |
+        Set-Content -LiteralPath $environmentOutputPath -Encoding UTF8
+}
 
 Write-Host "FactoryLens FL-B110 validation"
 Write-Host "Repository : $RepositoryRoot"
