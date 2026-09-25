@@ -67,6 +67,7 @@ public class UbtCompileMetadataGeneratorTest {
         assertTrue(commandText.contains("FactoryEditor"))
         assertTrue(commandText.contains("-Compiler=VisualStudio2022"))
         assertTrue(commandText.contains("-Mode=GenerateClangDatabase"))
+        assertTrue(commandText.contains("-NoExecCodeGenActions"))
         assertTrue(commandText.contains("-OutputDir="))
     }
 

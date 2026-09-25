@@ -90,6 +90,7 @@ public class UbtCompileMetadataGenerator(
             "-Project=" + request.workspace.projectFile,
             "-Compiler=" + request.compilerView.commandValue,
             "-Mode=GenerateClangDatabase",
+            "-NoExecCodeGenActions",
             "-OutputDir=" + outputDirectory,
             "-WaitMutex",
         )
