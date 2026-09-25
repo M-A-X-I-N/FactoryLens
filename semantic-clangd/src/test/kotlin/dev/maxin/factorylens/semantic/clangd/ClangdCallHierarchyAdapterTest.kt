@@ -21,7 +21,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotEquals
-import kotlin.test.assertNull
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 public class ClangdCallHierarchyAdapterTest {
@@ -64,7 +64,8 @@ public class ClangdCallHierarchyAdapterTest {
             val secondSymbol = secondPrepared as dev.maxin.factorylens.core.model.SymbolDescriptor
             assertEquals(firstSymbol.id, secondSymbol.id)
             assertEquals(SourceRealm.TARGET, firstSymbol.realm)
-            assertNull(firstSymbol.navigation.preferred())
+            val declaration = assertNotNull(firstSymbol.navigation.declaration)
+            assertEquals(SourceUri(fixture.rootFile.toUri().toString()), declaration.uri)
 
             val expansion = assertIs<AnalyzerResult.Success<*>>(
                 adapter.expandOutgoingCalls(firstSymbol.id),
@@ -108,6 +109,46 @@ public class ClangdCallHierarchyAdapterTest {
     }
 
     @Test
+    public fun omitsCallSitesWhenClangdCanonicalizesCallerToHeaderUri(): Unit {
+        val fixture = createFixture(rootFileName = "Root.h")
+        val start = ClangdBackendSessionFactory.start(fixture.config)
+        val session = assertIs<ClangdBackendStartResult.Success>(start).session
+        val adapter = ClangdCallHierarchyAdapter(
+            session = session,
+            target = AnalysisTargetId("rss"),
+            realmClassifier = SourceRealmClassifier { uri ->
+                if (uri == SourceUri(fixture.rootFile.toUri().toString())) {
+                    SourceRealm.TARGET
+                } else {
+                    SourceRealm.OTHER_EXTERNAL
+                }
+            },
+        )
+
+        try {
+            val prepared = assertIs<AnalyzerResult.Success<*>>(
+                adapter.prepareSymbol(
+                    fixture.rootFile,
+                    SourcePosition(line = 2, column = 6),
+                ),
+            ).value as dev.maxin.factorylens.core.model.SymbolDescriptor
+
+            val expansion = assertIs<AnalyzerResult.Success<*>>(
+                adapter.expandOutgoingCalls(prepared.id),
+            ).value as dev.maxin.factorylens.core.model.CallExpansion
+
+            assertTrue(expansion.edges.isNotEmpty())
+            assertTrue(expansion.edges.all { it.callSites.isEmpty() })
+            assertTrue(
+                expansion.diagnostics.any { it.code == "clangd-call-site-uri-ambiguous" },
+            )
+        } finally {
+            adapter.close()
+            session.close()
+        }
+    }
+
+    @Test
     public fun rejectsUnknownOriginWithoutSendingRawIdentityToClangd(): Unit {
         val fixture = createFixture()
         val start = ClangdBackendSessionFactory.start(fixture.config)
@@ -133,12 +174,12 @@ public class ClangdCallHierarchyAdapterTest {
         }
     }
 
-    private fun createFixture(): Fixture {
+    private fun createFixture(rootFileName: String = "Root.cpp"): Fixture {
         val root = Files.createTempDirectory("factorylens-call-hierarchy")
         val workspace = root.resolve("workspace").createDirectories()
         val targetDir = workspace.resolve("Mods/RSS/Source/RSS/Private").createDirectories()
         val engineDir = root.resolve("Engine/Source/Runtime/Core/Private").createDirectories()
-        val rootFile = targetDir.resolve("Root.cpp")
+        val rootFile = targetDir.resolve(rootFileName)
         val targetCallee = targetDir.resolve("Local.cpp")
         val boundaryCallee = engineDir.resolve("Boundary.cpp")
         rootFile.writeText(
