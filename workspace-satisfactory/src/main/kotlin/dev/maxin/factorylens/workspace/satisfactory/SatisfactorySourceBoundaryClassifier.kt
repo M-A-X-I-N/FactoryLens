@@ -6,29 +6,37 @@ import dev.maxin.factorylens.core.model.SourceRealmClassifier
 import dev.maxin.factorylens.core.model.SourceUri
 import java.net.URI
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.absolute
 
 /**
  * Classifies source locations relative to one configured Satisfactory workspace and analysis target.
  *
- * Classification is lexical by normalized path. It deliberately does not resolve symlinks/junctions,
- * because semantic backends should be classified against the paths they actually report.
+ * Semantic backends may canonicalize a source path through a symlink or Windows junction before
+ * reporting it. Classification therefore compares both the configured lexical paths and their
+ * real-path equivalents when those paths exist. This preserves target ownership without rewriting
+ * the source URI clangd actually returned.
  */
 public class SatisfactorySourceBoundaryClassifier(
     workspace: SatisfactoryWorkspace,
     engine: UnrealEngineInstallation,
     target: AnalysisTarget,
 ) : SourceRealmClassifier {
+    private val canonicalPathCache = ConcurrentHashMap<Path, Path>()
     private val workspaceRoot = workspace.normalizedRoot()
-    private val modsRoot = workspace.modsRoot.absolute().normalize()
-    private val projectSourceRoot = workspaceRoot.resolve("Source").normalize()
-    private val smlRoot = modsRoot.resolve("SML").normalize()
-    private val engineRoot = engine.root.absolute().normalize()
-    private val targetRoots = target.sourceRoots.map { sourceRoot ->
-        requireNotNull(pathFromFileUri(sourceRoot)) {
-            "Satisfactory analysis target source roots must use file URIs: ${sourceRoot.value}"
+    private val workspaceRoots = pathVariants(workspaceRoot)
+    private val modsRoots = pathVariants(workspace.modsRoot.absolute().normalize())
+    private val projectSourceRoots = pathVariants(workspaceRoot.resolve("Source").normalize())
+    private val smlRoots = pathVariants(workspace.modsRoot.absolute().normalize().resolve("SML"))
+    private val engineRoots = pathVariants(engine.root.absolute().normalize())
+    private val targetRoots = target.sourceRoots
+        .flatMap { sourceRoot ->
+            val path = requireNotNull(pathFromFileUri(sourceRoot)) {
+                "Satisfactory analysis target source roots must use file URIs: ${sourceRoot.value}"
+            }
+            pathVariants(path)
         }
-    }
+        .toSet()
 
     override fun classify(uri: SourceUri): SourceRealm =
         pathFromFileUri(uri)
@@ -37,23 +45,24 @@ public class SatisfactorySourceBoundaryClassifier(
 
     public fun classify(path: Path): SourceRealm {
         val normalized = normalizeAgainstWorkspace(path)
+        val candidates = pathVariants(normalized)
 
-        if (isGenerated(normalized)) {
+        if (candidates.any(::isGenerated)) {
             return SourceRealm.GENERATED
         }
-        if (targetRoots.any(normalized::startsWith)) {
+        if (matchesAnyRoot(candidates, targetRoots)) {
             return SourceRealm.TARGET
         }
-        if (normalized.startsWith(engineRoot)) {
+        if (matchesAnyRoot(candidates, engineRoots)) {
             return SourceRealm.UNREAL_ENGINE
         }
-        if (normalized.startsWith(smlRoot)) {
+        if (matchesAnyRoot(candidates, smlRoots)) {
             return SourceRealm.SML
         }
-        if (normalized.startsWith(projectSourceRoot)) {
+        if (matchesAnyRoot(candidates, projectSourceRoots)) {
             return SourceRealm.FACTORY_GAME
         }
-        if (normalized.startsWith(modsRoot)) {
+        if (matchesAnyRoot(candidates, modsRoots)) {
             return SourceRealm.DEPENDENCY_MOD
         }
 
@@ -65,6 +74,30 @@ public class SatisfactorySourceBoundaryClassifier(
             path.normalize()
         } else {
             workspaceRoot.resolve(path).normalize()
+        }
+
+    private fun pathVariants(path: Path): Set<Path> {
+        val normalized = path.absolute().normalize()
+        val canonical = canonicalPathCache.computeIfAbsent(normalized) { candidate ->
+            try {
+                candidate.toRealPath()
+            } catch (_: Exception) {
+                candidate
+            }
+        }
+        return if (canonical == normalized) {
+            setOf(normalized)
+        } else {
+            setOf(normalized, canonical)
+        }
+    }
+
+    private fun matchesAnyRoot(
+        candidates: Set<Path>,
+        roots: Set<Path>,
+    ): Boolean =
+        candidates.any { candidate ->
+            roots.any(candidate::startsWith)
         }
 
     private fun isGenerated(path: Path): Boolean {
