@@ -24,8 +24,19 @@ if ($Clangd) {
     $arguments += @("-Clangd", $Clangd)
 }
 
-$b110Output = & powershell.exe @arguments 2>&1
-$b110Exit = $LASTEXITCODE
+$previousErrorActionPreference = $ErrorActionPreference
+try {
+    # Windows PowerShell 5.1 wraps native stderr from the child process as
+    # non-terminating ErrorRecord objects. Preserve that output, but judge
+    # success from the child process exit code instead of treating stderr text
+    # (for example Java/Gradle diagnostics) as a terminating script failure.
+    $ErrorActionPreference = "Continue"
+    $b110Output = & powershell.exe @arguments 2>&1
+    $b110Exit = $LASTEXITCODE
+}
+finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+}
 $b110Output | ForEach-Object { Write-Host $_ }
 
 if ($b110Exit -ne 0) {
