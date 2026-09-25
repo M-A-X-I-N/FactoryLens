@@ -133,6 +133,17 @@ public class CallGraphSessionTest {
         )
         assertEquals(5, snapshot.nodes.size)
         assertEquals(6, snapshot.edges.size)
+
+        graph.clear()
+        val cleared = graph.stats()
+        assertEquals(0, cleared.cachedExpansionCount)
+        assertEquals(0, cleared.backendQueryCount)
+        assertEquals(0, cleared.cacheHitCount)
+        assertEquals(0, cleared.uniqueNodeCount)
+        assertEquals(0, cleared.uniqueEdgeCount)
+        assertTrue(graph.snapshot().nodes.isEmpty())
+        assertTrue(graph.snapshot().edges.isEmpty())
+        assertTrue(graph.snapshot().cachedOrigins.isEmpty())
     }
 
     @Test
