@@ -2,6 +2,7 @@ package dev.maxin.factorylens.workspace.satisfactory
 
 import dev.maxin.factorylens.core.api.AnalysisTarget
 import dev.maxin.factorylens.core.model.SourceRealm
+import dev.maxin.factorylens.core.model.SourceRealmClassifier
 import dev.maxin.factorylens.core.model.SourceUri
 import java.net.URI
 import java.nio.file.Path
@@ -17,7 +18,7 @@ public class SatisfactorySourceBoundaryClassifier(
     workspace: SatisfactoryWorkspace,
     engine: UnrealEngineInstallation,
     target: AnalysisTarget,
-) {
+) : SourceRealmClassifier {
     private val workspaceRoot = workspace.normalizedRoot()
     private val modsRoot = workspace.modsRoot.absolute().normalize()
     private val projectSourceRoot = workspaceRoot.resolve("Source").normalize()
@@ -29,7 +30,7 @@ public class SatisfactorySourceBoundaryClassifier(
         }
     }
 
-    public fun classify(uri: SourceUri): SourceRealm =
+    override fun classify(uri: SourceUri): SourceRealm =
         pathFromFileUri(uri)
             ?.let(::classify)
             ?: SourceRealm.UNKNOWN
