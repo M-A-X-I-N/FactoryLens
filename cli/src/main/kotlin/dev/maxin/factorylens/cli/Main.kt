@@ -3,11 +3,13 @@ package dev.maxin.factorylens.cli
 import dev.maxin.factorylens.core.FactoryLensProduct
 import dev.maxin.factorylens.core.api.AnalysisTarget
 import dev.maxin.factorylens.core.api.AnalyzerResult
+import dev.maxin.factorylens.core.api.ProgressReporter
 import dev.maxin.factorylens.core.model.AnalysisTargetId
 import dev.maxin.factorylens.core.model.CallEdgeScope
 import dev.maxin.factorylens.core.model.SourcePosition
 import dev.maxin.factorylens.core.model.SourceUri
 import dev.maxin.factorylens.semantic.clangd.ClangdCallHierarchyAdapter
+import dev.maxin.factorylens.semantic.clangd.ClangdExternalOverrideRootProvider
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendConfig
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendDescriptor
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendSessionFactory
@@ -35,6 +37,7 @@ public fun main(args: Array<String>) {
         "compile-metadata" -> runCompileMetadata(args.drop(1))
         "backend-check" -> runBackendCheck(args.drop(1))
         "call-expand-check" -> runCallExpandCheck(args.drop(1))
+        "external-override-check" -> runExternalOverrideCheck(args.drop(1))
         null, "help", "--help", "-h" -> {
             printHelp()
             0
@@ -59,6 +62,7 @@ private fun printHelp(): Unit {
     println("  compile-metadata [options]  Discover an SML workspace and generate UBT compile metadata.")
     println("  backend-check [options]     Start, initialize, report, and cleanly stop clangd.")
     println("  call-expand-check [options] Prepare and expand the FL-B130 RSS2 semantic specimen.")
+    println("  external-override-check [options] Discover and validate FL-B150 RSS2 override roots.")
     println()
     println("compile-metadata options:")
     println("  --sml-root PATH       SML Starter Project root; defaults to SML_PROJECT_ROOT/.env.")
@@ -79,6 +83,13 @@ private fun printHelp(): Unit {
     println("  --clangd PATH         clangd executable; defaults to FACTORYLENS_CLANGD/.env.")
     println("  --compile-db PATH     Directory containing compile_commands.json; default: work/.../clang.")
     println("  --log PATH            clangd stderr log; default: work/factorylens/semantic-clangd/b130-clangd-stderr.log.")
+    println()
+    println("external-override-check options:")
+    println("  --sml-root PATH       SML Starter Project root; defaults to SML_PROJECT_ROOT/.env.")
+    println("  --engine-root PATH    Explicit Unreal Engine root; otherwise EngineAssociation registry lookup.")
+    println("  --clangd PATH         clangd executable; defaults to FACTORYLENS_CLANGD/.env.")
+    println("  --compile-db PATH     Directory containing compile_commands.json; default: work/.../clang.")
+    println("  --log PATH            clangd stderr log; default: work/factorylens/semantic-clangd/b150-clangd-stderr.log.")
 }
 
 private fun runCompileMetadata(arguments: List<String>): Int {
@@ -357,7 +368,7 @@ private fun runBackendCheck(arguments: List<String>): Int {
 }
 
 private fun runCallExpandCheck(arguments: List<String>): Int {
-    val options = parseCallExpandCheckOptions(arguments) ?: return 2
+    val options = parseSemanticCheckOptions(arguments) ?: return 2
     val cwd = Path.of("").absolute().normalize()
     val dotenv = readDotEnv(cwd.resolve(".env"))
 
@@ -587,6 +598,236 @@ private fun runCallExpandCheck(arguments: List<String>): Int {
     }
 }
 
+
+private fun runExternalOverrideCheck(arguments: List<String>): Int {
+    val options = parseSemanticCheckOptions(arguments) ?: return 2
+    val cwd = Path.of("").absolute().normalize()
+    val dotenv = readDotEnv(cwd.resolve(".env"))
+
+    val smlRootText =
+        options.values["--sml-root"] ?:
+        System.getenv("SML_PROJECT_ROOT") ?:
+        dotenv["SML_PROJECT_ROOT"]
+    if (smlRootText.isNullOrBlank()) {
+        System.err.println(
+            "SML project root is required via --sml-root, SML_PROJECT_ROOT, or repository .env.",
+        )
+        return 2
+    }
+
+    val workspace = when (
+        val result = SatisfactoryWorkspaceDiscovery.discover(
+            resolveConfiguredPath(cwd, smlRootText),
+        )
+    ) {
+        is WorkspaceDiscoveryResult.Success -> result.workspace
+        is WorkspaceDiscoveryResult.Failure -> {
+            System.err.println("Workspace discovery failed: " + result.message)
+            return 2
+        }
+    }
+
+    val explicitEngineText =
+        options.values["--engine-root"] ?:
+        System.getenv("FACTORYLENS_ENGINE_ROOT") ?:
+        dotenv["FACTORYLENS_ENGINE_ROOT"]
+    val explicitEngine = explicitEngineText
+        ?.takeIf { it.isNotBlank() }
+        ?.let { resolveConfiguredPath(cwd, it) }
+    val engine = when (
+        val result = UnrealEngineResolver().resolve(
+            workspace = workspace,
+            explicitRoot = explicitEngine,
+        )
+    ) {
+        is EngineResolutionResult.Success -> result.engine
+        is EngineResolutionResult.Failure -> {
+            System.err.println("Engine resolution failed: " + result.message)
+            return 2
+        }
+    }
+
+    val clangdText =
+        options.values["--clangd"] ?:
+        System.getenv("FACTORYLENS_CLANGD") ?:
+        dotenv["FACTORYLENS_CLANGD"]
+    if (clangdText.isNullOrBlank()) {
+        System.err.println(
+            "clangd is required via --clangd, FACTORYLENS_CLANGD, or repository .env.",
+        )
+        return 2
+    }
+
+    val clangd = resolveConfiguredPath(cwd, clangdText)
+    val compileDatabase = options.values["--compile-db"]
+        ?.let { resolveConfiguredPath(cwd, it) }
+        ?: cwd.resolve("work/factorylens/compile-metadata/clang")
+    val logPath = options.values["--log"]
+        ?.let { resolveConfiguredPath(cwd, it) }
+        ?: cwd.resolve("work/factorylens/semantic-clangd/b150-clangd-stderr.log")
+
+    val targetRoot = workspace.root
+        .resolve("Mods/GameFeatures/RSS/Source/RSS")
+        .normalize()
+    if (!java.nio.file.Files.isDirectory(targetRoot)) {
+        System.err.println("FL-B150 RSS2 target root was not found: $targetRoot")
+        return 2
+    }
+
+    val target = AnalysisTarget(
+        id = AnalysisTargetId("rss2"),
+        displayName = "RSS2",
+        sourceRoots = listOf(SourceUri(targetRoot.toUri().toString())),
+    )
+    val classifier = SatisfactorySourceBoundaryClassifier(
+        workspace = workspace,
+        engine = engine,
+        target = target,
+    )
+
+    val start = ClangdBackendSessionFactory.start(
+        ClangdBackendConfig(
+            executable = clangd,
+            compileCommandsDirectory = compileDatabase,
+            workspaceRoot = workspace.root,
+            stderrLog = logPath,
+        ),
+    )
+    val session = when (start) {
+        is ClangdBackendStartResult.Success -> start.session
+        is ClangdBackendStartResult.Failure -> {
+            System.err.println("status=failure")
+            System.err.println("failure_code=" + start.error.code)
+            System.err.println("message=" + start.error.message)
+            if (start.error.details != null) {
+                System.err.println("details=" + start.error.details)
+            }
+            return 2
+        }
+    }
+
+    val callHierarchy = ClangdCallHierarchyAdapter(
+        session = session,
+        target = target.id,
+        realmClassifier = classifier,
+    )
+    val provider = ClangdExternalOverrideRootProvider(
+        session = session,
+        analysisTarget = target,
+        realmClassifier = classifier,
+        callHierarchy = callHierarchy,
+    )
+
+    try {
+        val discovery = when (
+            val result = provider.discoverRoots(
+                ProgressReporter { progress ->
+                    println(
+                        "progress=" +
+                            (progress.completedUnits?.toString() ?: "?") +
+                            "/" +
+                            (progress.totalUnits?.toString() ?: "?") +
+                            "|" +
+                            progress.message,
+                    )
+                },
+            )
+        ) {
+            is AnalyzerResult.Success -> result.value
+            is AnalyzerResult.Failure -> {
+                System.err.println("status=failure")
+                System.err.println("failure_code=" + result.error.code)
+                System.err.println("message=" + result.error.message)
+                if (result.error.details != null) {
+                    System.err.println("details=" + result.error.details)
+                }
+                return 2
+            }
+        }
+
+        println("status=success")
+        println("workspace=" + workspace.root)
+        println("engine=" + engine.root)
+        println("clangd_version=" + session.version.raw.lineSequence().first())
+        println("compile_database=" + compileDatabase.resolve("compile_commands.json"))
+        println("target_root=" + targetRoot)
+        println("background_index=" + session.state().backgroundIndex)
+        println("completeness=" + discovery.completeness)
+        println("root_count=" + discovery.roots.size)
+        println("diagnostic_count=" + discovery.diagnostics.size)
+
+        discovery.diagnostics.forEach { diagnostic ->
+            println(
+                "diagnostic=" +
+                    diagnostic.code + "|" +
+                    diagnostic.severity + "|" +
+                    diagnostic.message,
+            )
+        }
+
+        discovery.roots.forEach { root ->
+            val bases = root.evidence
+                .mapNotNull { evidence -> evidence.location?.uri?.value }
+                .distinct()
+                .joinToString(",")
+            println(
+                "root=" +
+                    (root.symbol.qualifiedName ?: root.symbol.displayName) +
+                    "|" +
+                    root.priority +
+                    "|realm=" + root.symbol.realm +
+                    "|bases=" + bases,
+            )
+        }
+
+        val discoveredNames = discovery.roots
+            .mapNotNull { root -> root.symbol.qualifiedName }
+            .toSet()
+        val requiredPositives = setOf(
+            "ARssDataManagerSubsystem::Tick",
+            "ARSSImageSubsystem::BeginPlay",
+            "URssSignWidget::NativeTick",
+            "URssWidgetRenderComponent::BeginPlay",
+            "FRSSModule::StartupModule",
+            "ARSSSignHologram::GetRotationStep",
+            "ARSSSignHologramPipeAndBelts::IsValidHitResult",
+        )
+        val requiredNegatives = setOf(
+            "ARssDataManagerSubsystem::CheckCopy",
+            "URssWidgetRenderComponent::RequestRedraw",
+        )
+
+        val missingPositives = requiredPositives - discoveredNames
+        val unexpectedNegatives = requiredNegatives intersect discoveredNames
+        val evidenceComplete = discovery.roots.all { root ->
+            root.evidence.isNotEmpty() &&
+                root.evidence.all { evidence ->
+                    evidence.kind ==
+                        dev.maxin.factorylens.core.model.EvidenceKind
+                            .FOREGROUND_OVERRIDE_VERIFICATION &&
+                        evidence.location != null
+                }
+        }
+        val pass =
+            missingPositives.isEmpty() &&
+                unexpectedNegatives.isEmpty() &&
+                evidenceComplete
+
+        println("required_positive_count=" + requiredPositives.size)
+        println("missing_positives=" + missingPositives.sorted().joinToString(","))
+        println("unexpected_negatives=" + unexpectedNegatives.sorted().joinToString(","))
+        println("all_roots_have_external_base_evidence=" + evidenceComplete)
+        println("b150_pass_condition=" + pass)
+        println("stderr_log=" + logPath)
+        return if (pass) 0 else 3
+    } finally {
+        provider.close()
+        callHierarchy.close()
+        session.close()
+        println("shutdown_status=" + session.state().status)
+    }
+}
+
 private fun sourcePositionForNeedle(
     text: String,
     needle: String,
@@ -697,7 +938,7 @@ private fun parseBackendCheckOptions(arguments: List<String>): ParsedOptions? {
     )
 }
 
-private fun parseCallExpandCheckOptions(arguments: List<String>): ParsedOptions? {
+private fun parseSemanticCheckOptions(arguments: List<String>): ParsedOptions? {
     val values = linkedMapOf<String, String>()
     val valueOptions = setOf(
         "--sml-root",
