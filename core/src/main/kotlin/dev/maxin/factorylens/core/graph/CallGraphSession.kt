@@ -202,6 +202,16 @@ public class CallGraphSession(
                 )
             }
 
+            val shortestDepth = admittedTargetDepth[symbolId]
+            if (shortestDepth != null && depth > shortestDepth) {
+                return CallTreeNode(
+                    node = node,
+                    incomingEdge = incomingEdge,
+                    depth = depth,
+                    disposition = CallTreeNodeDisposition.SHARED,
+                )
+            }
+
             if (symbolId in rendered) {
                 return CallTreeNode(
                     node = node,
@@ -213,7 +223,7 @@ public class CallGraphSession(
 
             rendered += symbolId
 
-            if (symbolId in depthLimitedNodes) {
+            if (depth >= limits.maxDepth) {
                 return CallTreeNode(
                     node = node,
                     incomingEdge = incomingEdge,
