@@ -133,6 +133,32 @@ UNKNOWN
 
 FL-B120 owns actually classifying real project sources into these realms.
 
+The supported Satisfactory classifier is workspace-aware and target-aware. It classifies normalized file paths with this precedence:
+
+```text
+GENERATED
+  -> TARGET
+     -> UNREAL_ENGINE
+        -> SML
+           -> FACTORY_GAME
+              -> DEPENDENCY_MOD
+                 -> OTHER_EXTERNAL
+```
+
+`UNKNOWN` is reserved for source references that cannot be represented as a local file path, such as unsupported/non-file URIs.
+
+The initial realm rules are:
+
+- `GENERATED` — paths under an `Intermediate` directory, plus recognized generated-source filename forms such as `*.generated.h`, `*.gen.cpp`, and `*.ispc.generated.h`; generated classification wins even when the file sits beneath the selected target, SML, FactoryGame, or Unreal Engine;
+- `TARGET` — a path beneath any `AnalysisTarget.sourceRoots` file URI;
+- `UNREAL_ENGINE` — a path beneath the resolved Unreal Engine installation root;
+- `SML` — a path beneath the SML mod root at `<workspace>/Mods/SML`;
+- `FACTORY_GAME` — authored Satisfactory project source beneath `<workspace>/Source`, including modules such as `FactoryGame`, `FactoryDedicatedClient`, and `FactoryDedicatedServer`;
+- `DEPENDENCY_MOD` — another path beneath `<workspace>/Mods` after the selected target and SML have been excluded;
+- `OTHER_EXTERNAL` — any other local file path, including other workspace plugins and sources outside both the workspace and resolved engine root.
+
+The classifier is lexical over normalized paths and deliberately does not resolve filesystem symlinks/junctions. The semantic backend is classified against the path it actually reports, while targets may declare more than one source root when a supported project boundary spans multiple trees.
+
 The model establishes the vocabulary early so graph, filtering, and UI layers do not invent incompatible boundary enums independently.
 
 ## 1.5 Evidence and provenance
