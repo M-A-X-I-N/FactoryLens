@@ -56,7 +56,18 @@ Use:
 
 If a conversation changes a durable project fact, update the owning document.
 
-## 1.7 Commit provenance
+## 1.7 Human-run validation scripts
+
+When a human must run repository validation manually, prefer a committed script under `scripts/` instead of pasting a multi-command procedure into chat.
+
+- Task-specific validation scripts must include the task ID in the filename, for example `FL-B100-validate-compile-metadata.ps1`.
+- Generic validation/tooling scripts that are not tied to one roadmap task do not need a task ID.
+- A genuinely single-line command may be given directly without creating a script.
+- Prefer CI or other automated validation over asking the human to run scripts; manual validation should be a close-to-last-resort path for environment-specific evidence.
+- Manual validation scripts are exempt from the general preference for cross-platform/Python tooling when a platform-specific language is the practical way to exercise the target environment (for example, PowerShell for a Windows-only validation).
+- Keep the script narrow, reproducible, and suitable for rerunning after a fresh checkout when practical.
+
+## 1.8 Commit provenance
 
 Use the subject convention from `../AGENTS.md`. Agents must not self-select `CBA`.
 
