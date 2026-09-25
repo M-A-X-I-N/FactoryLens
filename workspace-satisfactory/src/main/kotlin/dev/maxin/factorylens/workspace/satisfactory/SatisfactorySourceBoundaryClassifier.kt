@@ -24,7 +24,6 @@ public class SatisfactorySourceBoundaryClassifier(
 ) : SourceRealmClassifier {
     private val canonicalPathCache = ConcurrentHashMap<Path, Path>()
     private val workspaceRoot = workspace.normalizedRoot()
-    private val workspaceRoots = pathVariants(workspaceRoot)
     private val modsRoots = pathVariants(workspace.modsRoot.absolute().normalize())
     private val projectSourceRoots = pathVariants(workspaceRoot.resolve("Source").normalize())
     private val smlRoots = pathVariants(workspace.modsRoot.absolute().normalize().resolve("SML"))
