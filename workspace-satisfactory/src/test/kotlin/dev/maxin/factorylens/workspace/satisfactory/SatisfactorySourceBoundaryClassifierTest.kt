@@ -147,6 +147,50 @@ public class SatisfactorySourceBoundaryClassifierTest {
     }
 
     @Test
+    public fun classifiesCanonicalTargetPathsBehindSymlinksWhenSupported(): Unit {
+        val fixture = fixture(createClassifier = false)
+        val physicalRoot = fixture.workspace.root.parent
+            .resolve("physical-rss")
+            .createDirectories()
+        val logicalRoot = fixture.workspace.modsRoot
+            .resolve("GameFeatures/LinkedRSS")
+        logicalRoot.parent.createDirectories()
+
+        try {
+            Files.createSymbolicLink(logicalRoot, physicalRoot)
+        } catch (_: Exception) {
+            // Windows CI may not grant symlink creation. The real Windows workspace exercises the
+            // equivalent junction/canonical-path behavior through manual semantic validation.
+            return
+        }
+
+        val sourceFile = physicalRoot
+            .resolve("Private/Linked.cpp")
+        sourceFile.parent.createDirectories()
+        Files.writeString(sourceFile, "void Linked() {}\n")
+
+        val target = AnalysisTarget(
+            id = AnalysisTargetId("linked-rss"),
+            displayName = "Linked RSS",
+            sourceRoots = listOf(SourceUri(logicalRoot.toUri().toString())),
+        )
+        val classifier = SatisfactorySourceBoundaryClassifier(
+            workspace = fixture.workspace,
+            engine = fixture.engine,
+            target = target,
+        )
+
+        assertEquals(
+            SourceRealm.TARGET,
+            classifier.classify(sourceFile),
+        )
+        assertEquals(
+            SourceRealm.TARGET,
+            classifier.classify(logicalRoot.resolve("Private/Linked.cpp")),
+        )
+    }
+
+    @Test
     public fun rejectsNonFileTargetRoots(): Unit {
         val fixture = fixture(createClassifier = false)
         val invalidTarget = AnalysisTarget(
