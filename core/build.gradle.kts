@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     compileOnly(kotlin("stdlib"))
+    testImplementation(kotlin("test"))
 }
 
 kotlin {
@@ -14,4 +15,9 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_25)
     }
+}
+
+
+tasks.test {
+    useJUnitPlatform()
 }
