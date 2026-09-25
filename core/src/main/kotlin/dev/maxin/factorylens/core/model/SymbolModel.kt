@@ -23,6 +23,10 @@ public enum class SourceRealm {
     UNKNOWN,
 }
 
+public fun interface SourceRealmClassifier {
+    public fun classify(uri: SourceUri): SourceRealm
+}
+
 public data class SymbolDescriptor(
     public val id: SymbolId,
     public val displayName: String,
