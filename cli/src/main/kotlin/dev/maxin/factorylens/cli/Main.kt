@@ -1,12 +1,20 @@
 package dev.maxin.factorylens.cli
 
 import dev.maxin.factorylens.core.FactoryLensProduct
+import dev.maxin.factorylens.core.api.AnalysisTarget
+import dev.maxin.factorylens.core.api.AnalyzerResult
+import dev.maxin.factorylens.core.model.AnalysisTargetId
+import dev.maxin.factorylens.core.model.CallEdgeScope
+import dev.maxin.factorylens.core.model.SourcePosition
+import dev.maxin.factorylens.core.model.SourceUri
+import dev.maxin.factorylens.semantic.clangd.ClangdCallHierarchyAdapter
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendConfig
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendDescriptor
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendSessionFactory
 import dev.maxin.factorylens.semantic.clangd.ClangdBackendStartResult
 import dev.maxin.factorylens.workspace.satisfactory.CompileMetadataResult
 import dev.maxin.factorylens.workspace.satisfactory.EngineResolutionResult
+import dev.maxin.factorylens.workspace.satisfactory.SatisfactorySourceBoundaryClassifier
 import dev.maxin.factorylens.workspace.satisfactory.SatisfactoryWorkspaceDiscovery
 import dev.maxin.factorylens.workspace.satisfactory.UbtCompileMetadataGenerator
 import dev.maxin.factorylens.workspace.satisfactory.UbtCompileMetadataRequest
@@ -18,6 +26,7 @@ import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
+import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.system.exitProcess
 
@@ -25,6 +34,7 @@ public fun main(args: Array<String>) {
     val exitCode = when (args.firstOrNull()) {
         "compile-metadata" -> runCompileMetadata(args.drop(1))
         "backend-check" -> runBackendCheck(args.drop(1))
+        "call-expand-check" -> runCallExpandCheck(args.drop(1))
         null, "help", "--help", "-h" -> {
             printHelp()
             0
@@ -48,6 +58,7 @@ private fun printHelp(): Unit {
     println("Commands:")
     println("  compile-metadata [options]  Discover an SML workspace and generate UBT compile metadata.")
     println("  backend-check [options]     Start, initialize, report, and cleanly stop clangd.")
+    println("  call-expand-check [options] Prepare and expand the FL-B130 RSS2 semantic specimen.")
     println()
     println("compile-metadata options:")
     println("  --sml-root PATH       SML Starter Project root; defaults to SML_PROJECT_ROOT/.env.")
@@ -61,6 +72,13 @@ private fun printHelp(): Unit {
     println("  --clangd PATH         clangd executable; defaults to FACTORYLENS_CLANGD/.env.")
     println("  --compile-db PATH     Directory containing compile_commands.json; default: work/.../clang.")
     println("  --log PATH            clangd stderr log; default: work/factorylens/semantic-clangd/clangd-stderr.log.")
+    println()
+    println("call-expand-check options:")
+    println("  --sml-root PATH       SML Starter Project root; defaults to SML_PROJECT_ROOT/.env.")
+    println("  --engine-root PATH    Explicit Unreal Engine root; otherwise EngineAssociation registry lookup.")
+    println("  --clangd PATH         clangd executable; defaults to FACTORYLENS_CLANGD/.env.")
+    println("  --compile-db PATH     Directory containing compile_commands.json; default: work/.../clang.")
+    println("  --log PATH            clangd stderr log; default: work/factorylens/semantic-clangd/b130-clangd-stderr.log.")
 }
 
 private fun runCompileMetadata(arguments: List<String>): Int {
@@ -338,6 +356,252 @@ private fun runBackendCheck(arguments: List<String>): Int {
     return 0
 }
 
+private fun runCallExpandCheck(arguments: List<String>): Int {
+    val options = parseCallExpandCheckOptions(arguments) ?: return 2
+    val cwd = Path.of("").absolute().normalize()
+    val dotenv = readDotEnv(cwd.resolve(".env"))
+
+    val smlRootText =
+        options.values["--sml-root"] ?:
+        System.getenv("SML_PROJECT_ROOT") ?:
+        dotenv["SML_PROJECT_ROOT"]
+    if (smlRootText.isNullOrBlank()) {
+        System.err.println(
+            "SML project root is required via --sml-root, SML_PROJECT_ROOT, or repository .env.",
+        )
+        return 2
+    }
+
+    val smlRoot = resolveConfiguredPath(cwd, smlRootText)
+    val workspace = when (val result = SatisfactoryWorkspaceDiscovery.discover(smlRoot)) {
+        is WorkspaceDiscoveryResult.Success -> result.workspace
+        is WorkspaceDiscoveryResult.Failure -> {
+            System.err.println("Workspace discovery failed: " + result.message)
+            return 2
+        }
+    }
+
+    val explicitEngineText =
+        options.values["--engine-root"] ?:
+        System.getenv("FACTORYLENS_ENGINE_ROOT") ?:
+        dotenv["FACTORYLENS_ENGINE_ROOT"]
+    val explicitEngine = explicitEngineText
+        ?.takeIf { it.isNotBlank() }
+        ?.let { resolveConfiguredPath(cwd, it) }
+    val engine = when (
+        val result = UnrealEngineResolver().resolve(
+            workspace = workspace,
+            explicitRoot = explicitEngine,
+        )
+    ) {
+        is EngineResolutionResult.Success -> result.engine
+        is EngineResolutionResult.Failure -> {
+            System.err.println("Engine resolution failed: " + result.message)
+            return 2
+        }
+    }
+
+    val clangdText =
+        options.values["--clangd"] ?:
+        System.getenv("FACTORYLENS_CLANGD") ?:
+        dotenv["FACTORYLENS_CLANGD"]
+    if (clangdText.isNullOrBlank()) {
+        System.err.println(
+            "clangd is required via --clangd, FACTORYLENS_CLANGD, or repository .env.",
+        )
+        return 2
+    }
+
+    val clangd = resolveConfiguredPath(cwd, clangdText)
+    val compileDatabase = options.values["--compile-db"]
+        ?.let { resolveConfiguredPath(cwd, it) }
+        ?: cwd.resolve("work/factorylens/compile-metadata/clang")
+    val logPath = options.values["--log"]
+        ?.let { resolveConfiguredPath(cwd, it) }
+        ?: cwd.resolve("work/factorylens/semantic-clangd/b130-clangd-stderr.log")
+
+    val targetRoot = workspace.root
+        .resolve("Mods/GameFeatures/RSS/Source/RSS")
+        .normalize()
+    val sourceFile = targetRoot
+        .resolve("Private/RssBlueprintFunctionLibrary.cpp")
+        .normalize()
+    if (!java.nio.file.Files.isRegularFile(sourceFile)) {
+        System.err.println("FL-B130 RSS2 specimen source was not found: $sourceFile")
+        return 2
+    }
+
+    val sourceText = sourceFile.readText(Charsets.UTF_8).removePrefix("\uFEFF")
+    val position = sourcePositionForNeedle(
+        text = sourceText,
+        needle = "bool URssBlueprintFunctionLibrary::IsSignDataSafe",
+        symbol = "IsSignDataSafe",
+    ) ?: run {
+        System.err.println("Could not locate the FL-B130 IsSignDataSafe specimen in: $sourceFile")
+        return 2
+    }
+
+    val target = AnalysisTarget(
+        id = AnalysisTargetId("rss2"),
+        displayName = "RSS2",
+        sourceRoots = listOf(SourceUri(targetRoot.toUri().toString())),
+    )
+    val classifier = SatisfactorySourceBoundaryClassifier(
+        workspace = workspace,
+        engine = engine,
+        target = target,
+    )
+
+    val start = ClangdBackendSessionFactory.start(
+        ClangdBackendConfig(
+            executable = clangd,
+            compileCommandsDirectory = compileDatabase,
+            workspaceRoot = workspace.root,
+            stderrLog = logPath,
+        ),
+    )
+    val session = when (start) {
+        is ClangdBackendStartResult.Success -> start.session
+        is ClangdBackendStartResult.Failure -> {
+            System.err.println("status=failure")
+            System.err.println("failure_code=" + start.error.code)
+            System.err.println("message=" + start.error.message)
+            if (start.error.details != null) {
+                System.err.println("details=" + start.error.details)
+            }
+            return 2
+        }
+    }
+
+    val adapter = ClangdCallHierarchyAdapter(
+        session = session,
+        target = target.id,
+        realmClassifier = classifier,
+    )
+
+    try {
+        val prepared = when (val result = adapter.prepareSymbol(sourceFile, position)) {
+            is AnalyzerResult.Success -> result.value
+            is AnalyzerResult.Failure -> {
+                System.err.println("status=failure")
+                System.err.println("failure_code=" + result.error.code)
+                System.err.println("message=" + result.error.message)
+                if (result.error.details != null) {
+                    System.err.println("details=" + result.error.details)
+                }
+                return 2
+            }
+        }
+
+        val expansion = when (val result = adapter.expandOutgoingCalls(prepared.id)) {
+            is AnalyzerResult.Success -> result.value
+            is AnalyzerResult.Failure -> {
+                System.err.println("status=failure")
+                System.err.println("failure_code=" + result.error.code)
+                System.err.println("message=" + result.error.message)
+                if (result.error.details != null) {
+                    System.err.println("details=" + result.error.details)
+                }
+                return 2
+            }
+        }
+
+        println("status=success")
+        println("workspace=" + workspace.root)
+        println("engine=" + engine.root)
+        println("clangd_version=" + session.version.raw.lineSequence().first())
+        println("compile_database=" + compileDatabase.resolve("compile_commands.json"))
+        println("source=" + sourceFile)
+        println("source_line=" + position.line)
+        println("source_column=" + position.column)
+        println("origin_id=" + prepared.id.value)
+        println("origin_name=" + prepared.displayName)
+        println("origin_realm=" + prepared.realm)
+        println("origin_navigation=" + prepared.navigation.preferred())
+        println("completeness=" + expansion.completeness)
+        println("node_count=" + expansion.nodes.size)
+        println("edge_count=" + expansion.edges.size)
+        println("diagnostic_count=" + expansion.diagnostics.size)
+
+        for (diagnostic in expansion.diagnostics) {
+            println(
+                "diagnostic=" + diagnostic.code + "|" +
+                    diagnostic.severity + "|" +
+                    diagnostic.message,
+            )
+        }
+
+        for (node in expansion.nodes.sortedBy { it.symbol.displayName }) {
+            println(
+                "node=" + node.symbol.displayName + "|" +
+                    node.symbol.realm + "|" +
+                    node.symbol.id.value + "|" +
+                    (node.symbol.navigation.preferred()?.uri?.value ?: ""),
+            )
+        }
+        for (edge in expansion.edges.sortedBy { edge ->
+            expansion.nodes.firstOrNull { it.symbol.id == edge.callee }?.symbol?.displayName
+        }) {
+            val calleeName = expansion.nodes
+                .firstOrNull { it.symbol.id == edge.callee }
+                ?.symbol
+                ?.displayName
+                ?: edge.callee.value
+            println(
+                "edge=" + prepared.displayName + "->" + calleeName + "|" +
+                    edge.scope + "|call_sites=" + edge.callSites.size,
+            )
+        }
+
+        val expectedNode = expansion.nodes.firstOrNull {
+            it.symbol.displayName == "IsStructurallySafeRemoteImageUrl"
+        }
+        val expectedEdge = expectedNode?.let { node ->
+            expansion.edges.firstOrNull { edge -> edge.callee == node.symbol.id }
+        }
+        val pass =
+            prepared.realm == dev.maxin.factorylens.core.model.SourceRealm.TARGET &&
+                expectedNode?.symbol?.realm == dev.maxin.factorylens.core.model.SourceRealm.TARGET &&
+                expectedEdge?.scope == CallEdgeScope.TARGET_LOCAL
+
+        println("expected_callee=IsStructurallySafeRemoteImageUrl")
+        println("expected_callee_found=" + (expectedNode != null))
+        println("expected_edge_scope=" + expectedEdge?.scope)
+        println("b130_pass_condition=" + pass)
+        println("stderr_log=" + logPath)
+        return if (pass) 0 else 3
+    } finally {
+        adapter.close()
+        session.close()
+        println("shutdown_status=" + session.state().status)
+    }
+}
+
+private fun sourcePositionForNeedle(
+    text: String,
+    needle: String,
+    symbol: String,
+): SourcePosition? {
+    val needleStart = text.indexOf(needle)
+    if (needleStart < 0) {
+        return null
+    }
+    val symbolOffset = needle.indexOf(symbol)
+    if (symbolOffset < 0) {
+        return null
+    }
+
+    val absolute = needleStart + symbolOffset + if (symbol.length > 1) 1 else 0
+    val lineStart = text.lastIndexOf('\n', absolute - 1).let { index ->
+        if (index < 0) 0 else index + 1
+    }
+    val line = text.substring(0, absolute).count { it == '\n' }
+    val column = text.substring(lineStart, absolute)
+        .toByteArray(Charsets.UTF_16LE)
+        .size / 2
+    return SourcePosition(line = line, column = column)
+}
+
 private fun resolveConfiguredPath(
     base: Path,
     value: String,
@@ -421,6 +685,37 @@ private fun parseBackendCheckOptions(arguments: List<String>): ParsedOptions? {
         values = values,
         flags = emptySet(),
     )
+}
+
+private fun parseCallExpandCheckOptions(arguments: List<String>): ParsedOptions? {
+    val values = linkedMapOf<String, String>()
+    val valueOptions = setOf(
+        "--sml-root",
+        "--engine-root",
+        "--clangd",
+        "--compile-db",
+        "--log",
+    )
+
+    var index = 0
+    while (index < arguments.size) {
+        val argument = arguments[index]
+        if (argument !in valueOptions) {
+            System.err.println("Unknown call-expand-check option: " + argument)
+            return null
+        }
+
+        val value = arguments.getOrNull(index + 1)
+        if (value == null || value.startsWith("--")) {
+            System.err.println("Missing value for " + argument)
+            return null
+        }
+
+        values[argument] = value
+        index += 2
+    }
+
+    return ParsedOptions(values = values, flags = emptySet())
 }
 
 private fun readDotEnv(path: Path): Map<String, String> {
