@@ -80,6 +80,9 @@ public class CallGraphSession(
     /**
      * Builds a bounded tree-oriented projection from one target-local root.
      *
+     * Semantic discovery is breadth-first so a shared node is admitted/expanded at its shallowest
+     * reached depth before the path-local tree projection decides how to render repeated references.
+     *
      * Boundary calls are retained but never recursively expanded. The target-node limit counts
      * only TARGET symbols, matching the B4/B5 traversal model; boundary nodes do not consume the
      * recursive project budget.
@@ -105,68 +108,22 @@ public class CallGraphSession(
         val hitsBefore = cacheHitCount
         val traversalNodes = linkedMapOf(root.symbol.id to root)
         val traversalEdges = linkedMapOf<EdgeKey, CallEdge>()
-        val rendered = linkedSetOf<SymbolId>()
-        val admittedTargetNodes = linkedSetOf(root.symbol.id)
+        val admittedTargetDepth = linkedMapOf(root.symbol.id to 0)
+        val depthLimitedNodes = linkedSetOf<SymbolId>()
+        val omittedTargetNodes = linkedSetOf<SymbolId>()
         val diagnostics = mutableListOf<AnalyzerDiagnostic>()
+        val queue = ArrayDeque<Pair<GraphNode, Int>>()
+        queue.addLast(root to 0)
 
         var aggregateCompleteness = ResultCompleteness.COMPLETE
-        var depthLimitReached = false
-        var targetNodeLimitReached = false
-        var omittedTargetNodeCount = 0
 
-        fun walk(
-            node: GraphNode,
-            incomingEdge: CallEdge?,
-            depth: Int,
-            path: Set<SymbolId>,
-        ): AnalyzerResult<CallTreeNode> {
+        while (queue.isNotEmpty()) {
+            val (node, depth) = queue.removeFirst()
             val symbolId = node.symbol.id
 
-            if (node.symbol.realm != SourceRealm.TARGET) {
-                return AnalyzerResult.Success(
-                    CallTreeNode(
-                        node = node,
-                        incomingEdge = incomingEdge,
-                        depth = depth,
-                        disposition = CallTreeNodeDisposition.BOUNDARY,
-                    ),
-                )
-            }
-
-            if (symbolId in path) {
-                return AnalyzerResult.Success(
-                    CallTreeNode(
-                        node = node,
-                        incomingEdge = incomingEdge,
-                        depth = depth,
-                        disposition = CallTreeNodeDisposition.CYCLE,
-                    ),
-                )
-            }
-
-            if (symbolId in rendered) {
-                return AnalyzerResult.Success(
-                    CallTreeNode(
-                        node = node,
-                        incomingEdge = incomingEdge,
-                        depth = depth,
-                        disposition = CallTreeNodeDisposition.SHARED,
-                    ),
-                )
-            }
-
-            rendered += symbolId
-
             if (depth >= limits.maxDepth) {
-                depthLimitReached = true
-                return AnalyzerResult.Success(
-                    CallTreeNode(
-                        node = node,
-                        incomingEdge = incomingEdge,
-                        depth = depth,
-                        disposition = CallTreeNodeDisposition.DEPTH_LIMIT,
-                    ),
-                )
+                depthLimitedNodes += symbolId
+                continue
             }
 
             val expansionResult = expand(symbolId)
@@ -182,9 +139,6 @@ public class CallGraphSession(
             diagnostics += expansion.diagnostics
 
             val expansionNodes = expansion.nodes.associateBy { it.symbol.id }
-            val children = mutableListOf<CallTreeNode>()
-            val nextPath = path + symbolId
-
             for (edge in stableEdges(expansion)) {
                 val child = expansionNodes[edge.callee]
                     ?: return failure(
@@ -195,64 +149,114 @@ public class CallGraphSession(
                         recoverable = false,
                     )
 
-                if (
-                    edge.scope == CallEdgeScope.TARGET_LOCAL &&
-                    child.symbol.id !in admittedTargetNodes
-                ) {
-                    if (admittedTargetNodes.size >= limits.maxTargetNodes) {
-                        targetNodeLimitReached = true
-                        omittedTargetNodeCount += 1
-                        continue
+                if (edge.scope == CallEdgeScope.TARGET_LOCAL) {
+                    val knownDepth = admittedTargetDepth[child.symbol.id]
+                    if (knownDepth == null) {
+                        if (admittedTargetDepth.size >= limits.maxTargetNodes) {
+                            omittedTargetNodes += child.symbol.id
+                            continue
+                        }
+
+                        val childDepth = depth + 1
+                        admittedTargetDepth[child.symbol.id] = childDepth
+                        traversalNodes[child.symbol.id] = child
+                        queue.addLast(child to childDepth)
                     }
-                    admittedTargetNodes += child.symbol.id
+                } else {
+                    traversalNodes.putIfAbsent(child.symbol.id, child)
                 }
 
-                traversalNodes.putIfAbsent(child.symbol.id, child)
                 traversalEdges.putIfAbsent(
                     EdgeKey(edge.caller, edge.callee),
                     edge,
                 )
-
-                val childResult = walk(
-                    node = child,
-                    incomingEdge = edge,
-                    depth = depth + 1,
-                    path = nextPath,
-                )
-                when (childResult) {
-                    is AnalyzerResult.Failure -> return childResult
-                    is AnalyzerResult.Success -> children += childResult.value
-                }
             }
+        }
 
-            val disposition =
-                if (expansion.edges.isEmpty()) {
-                    CallTreeNodeDisposition.LEAF
-                } else {
-                    CallTreeNodeDisposition.EXPANDED
-                }
+        val edgesByCaller = traversalEdges.values.groupBy(CallEdge::caller)
+        val rendered = linkedSetOf<SymbolId>()
 
-            return AnalyzerResult.Success(
-                CallTreeNode(
+        fun project(
+            node: GraphNode,
+            incomingEdge: CallEdge?,
+            depth: Int,
+            path: Set<SymbolId>,
+        ): CallTreeNode {
+            val symbolId = node.symbol.id
+
+            if (node.symbol.realm != SourceRealm.TARGET) {
+                return CallTreeNode(
                     node = node,
                     incomingEdge = incomingEdge,
                     depth = depth,
-                    disposition = disposition,
-                    children = children,
-                ),
+                    disposition = CallTreeNodeDisposition.BOUNDARY,
+                )
+            }
+
+            if (symbolId in path) {
+                return CallTreeNode(
+                    node = node,
+                    incomingEdge = incomingEdge,
+                    depth = depth,
+                    disposition = CallTreeNodeDisposition.CYCLE,
+                )
+            }
+
+            if (symbolId in rendered) {
+                return CallTreeNode(
+                    node = node,
+                    incomingEdge = incomingEdge,
+                    depth = depth,
+                    disposition = CallTreeNodeDisposition.SHARED,
+                )
+            }
+
+            rendered += symbolId
+
+            if (symbolId in depthLimitedNodes) {
+                return CallTreeNode(
+                    node = node,
+                    incomingEdge = incomingEdge,
+                    depth = depth,
+                    disposition = CallTreeNodeDisposition.DEPTH_LIMIT,
+                )
+            }
+
+            val children = (edgesByCaller[symbolId] ?: emptyList())
+                .mapNotNull { edge ->
+                    traversalNodes[edge.callee]?.let { child ->
+                        project(
+                            node = child,
+                            incomingEdge = edge,
+                            depth = depth + 1,
+                            path = path + symbolId,
+                        )
+                    }
+                }
+
+            return CallTreeNode(
+                node = node,
+                incomingEdge = incomingEdge,
+                depth = depth,
+                disposition =
+                    if (children.isEmpty()) {
+                        CallTreeNodeDisposition.LEAF
+                    } else {
+                        CallTreeNodeDisposition.EXPANDED
+                    },
+                children = children,
             )
         }
 
-        val treeResult = walk(
+        val tree = project(
             node = root,
             incomingEdge = null,
             depth = 0,
             path = emptySet(),
         )
-        val tree = when (treeResult) {
-            is AnalyzerResult.Failure -> return treeResult
-            is AnalyzerResult.Success -> treeResult.value
-        }
+
+        val depthLimitReached = depthLimitedNodes.isNotEmpty()
+        val targetNodeLimitReached = omittedTargetNodes.isNotEmpty()
 
         if (targetNodeLimitReached) {
             diagnostics += AnalyzerDiagnostic(
@@ -260,7 +264,7 @@ public class CallGraphSession(
                 severity = DiagnosticSeverity.INFO,
                 message =
                     "Traversal reached the configured target-node limit " +
-                    "(${limits.maxTargetNodes}); $omittedTargetNodeCount target references were omitted.",
+                    "(${limits.maxTargetNodes}); ${omittedTargetNodes.size} target nodes were omitted.",
             )
         }
         if (depthLimitReached) {
@@ -292,7 +296,7 @@ public class CallGraphSession(
                 limits = limits,
                 depthLimitReached = depthLimitReached,
                 targetNodeLimitReached = targetNodeLimitReached,
-                omittedTargetNodeCount = omittedTargetNodeCount,
+                omittedTargetNodeCount = omittedTargetNodes.size,
                 backendQueries = backendQueryCount - queriesBefore,
                 cacheHits = cacheHitCount - hitsBefore,
             ),
