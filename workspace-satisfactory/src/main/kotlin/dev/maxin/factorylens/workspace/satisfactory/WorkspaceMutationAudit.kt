@@ -135,6 +135,37 @@ public object WorkspaceMutationAudit {
         return intermediateIndex + 2 < uhtIndex
     }
 
+    public fun isAcceptedUbtCompileMetadataBuildState(mutation: WorkspaceMutation): Boolean {
+        if (mutation.before == null || mutation.after == null) {
+            return false
+        }
+        if (
+            mutation.kind == WorkspaceMutationKind.ADDED ||
+            mutation.kind == WorkspaceMutationKind.REMOVED
+        ) {
+            return false
+        }
+
+        val segments = mutation.relativePath
+            .split('/', '\\')
+            .filter { it.isNotEmpty() }
+        val intermediateIndex = segments.indexOf("Intermediate")
+        if (
+            intermediateIndex < 0 ||
+            intermediateIndex + 2 >= segments.size ||
+            segments[intermediateIndex + 1] != "Build"
+        ) {
+            return false
+        }
+
+        val fileName = segments.last()
+        return fileName.endsWith(".rsp") ||
+            fileName.endsWith(".rsp.old") ||
+            fileName == "Definitions.h" ||
+            fileName == "Definitions.h.old" ||
+            fileName == "TargetMetadata.dat"
+    }
+
     private fun classify(
         before: FileFingerprint?,
         after: FileFingerprint?,
