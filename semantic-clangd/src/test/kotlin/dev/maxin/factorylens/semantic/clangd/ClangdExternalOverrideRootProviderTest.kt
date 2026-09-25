@@ -120,6 +120,10 @@ public class ClangdExternalOverrideRootProviderTest {
                 assertNotNull(evidence.location).uri,
             )
             assertTrue(evidence.summary.contains("UNREAL_ENGINE"))
+            assertEquals(
+                rootDescriptor.symbol,
+                callHierarchy.symbol(rootDescriptor.symbol.id),
+            )
 
             assertTrue(
                 discovery.diagnostics.any {
