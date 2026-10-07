@@ -19,8 +19,6 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 ## Active task index
 
-| Task | State | Dependencies | Title | Summary |
-|---|---|---|---|---|
 _No non-terminal tasks are currently defined._
 
 ## Completed tasks
@@ -32,7 +30,6 @@ _No non-terminal tasks are currently defined._
 | `FL-BASELINE-A-030` | `COMPLETE` | Reconcile legacy agent router | Supersede generic agent-directory/read-order guidance with the baseline router and retain the B1–B8 feasibility study's historical-evidence role in repository-local policy. |
 | `FL-BASELINE-A-040` | `COMPLETE` | Reconcile legacy workflow | Supersede generic checkpoint/recovery/provenance policy with baseline rules; preserve FactoryLens analyzer boundaries and human-run validation-script rules in local policy. |
 | `FL-BASELINE-A-050` | `COMPLETE` | Finalize instruction migration | Validate canonical baseline identity, local routing, legacy-instruction retirement, repository consistency enforcement, and preservation of the untouched legacy task roadmap. |
-
 
 ## Task contract
 
