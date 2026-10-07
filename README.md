@@ -38,7 +38,7 @@ UnrealBuildTool compile truth
 
 Rider is the intended first-class user experience, but the semantic/graph core should remain usable outside Rider when doing so is cheap.
 
-See [`TASKS.md`](TASKS.md) for the global roadmap and [`docs/README.md`](docs/README.md) for durable project documentation.
+See [`meta/tasks.md`](meta/tasks.md) for executable task state, [`meta/initiatives/product-roadmap.md`](meta/initiatives/product-roadmap.md) for non-executable roadmap/gate context, and [`docs/README.md`](docs/README.md) for durable project documentation.
 
 ## Proven so far
 
@@ -53,7 +53,7 @@ The complete evidence trail lives under [`research/external-call-map-feasibility
 ```text
 FactoryLens/
 ├─ AGENTS.md
-├─ TASKS.md
+├─ meta/                   task ledger, task specs/history, reminders, initiatives
 ├─ src/                    Rider plugin frontend shell
 ├─ core/                   IDE-independent product core
 ├─ semantic-clangd/        clangd semantic adapter

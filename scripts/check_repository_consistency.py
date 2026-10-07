@@ -9,7 +9,6 @@ import subprocess
 REQUIRED_PATHS = (
     Path("README.md"),
     Path("AGENTS.md"),
-    Path("TASKS.md"),
     Path(".agents/README.md"),
     Path(".agents/baseline/GIT.md"),
     Path(".agents/baseline/KNOWLEDGE.md"),
