@@ -19,15 +19,27 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 ## Active task index
 
-_No non-terminal tasks are currently defined._
-
-When tasks are added, record at least ID, state, dependencies, title, and a concise summary here, with the full execution contract in a linked file under `tasks/`.
+| Task | State | Dependencies | Title | Summary |
+|---|---|---|---|---|
+| [`FL-BASELINE-A-020`](tasks/FL-BASELINE-A/FL-BASELINE-A-020.md) | `QUEUED` | — | Reconcile legacy root agent guide | Reconcile `AGENTS.md.orig` against the canonical baseline, preserving only still-useful FactoryLens-specific residue in repository-owned local policy. |
+| [`FL-BASELINE-A-030`](tasks/FL-BASELINE-A/FL-BASELINE-A-030.md) | `QUEUED` | `FL-BASELINE-A-020` | Reconcile legacy agent router | Reconcile `.agents/README.md.orig` against the canonical baseline router and preserve only still-useful FactoryLens-specific residue locally. |
+| [`FL-BASELINE-A-040`](tasks/FL-BASELINE-A/FL-BASELINE-A-040.md) | `QUEUED` | `FL-BASELINE-A-030` | Reconcile legacy workflow | Reconcile the legacy `.agents/WORKFLOW.md` against baseline workflow policy and preserve only still-useful FactoryLens-specific rules locally. |
+| [`FL-BASELINE-A-050`](tasks/FL-BASELINE-A/FL-BASELINE-A-050.md) | `QUEUED` | `FL-BASELINE-A-040` | Finalize instruction migration | Validate the completed instruction migration, local routing, baseline byte identity, and retirement of legacy instruction inputs without migrating the legacy task roadmap. |
 
 ## Completed bootstrap
 
 | Task | State | Title | Summary |
 |---|---|---|---|
 | `FL-BASELINE-A-010` | `COMPLETE` | Import baseline | Preserve pre-existing baseline-path conflicts as `.orig`, import the canonical baseline tree, and establish the baseline task control plane. |
+
+## Migration authority boundary
+
+Until `FL-BASELINE-A-050` completes or the human explicitly says otherwise:
+
+- only instructions supplied by the imported baseline template are authoritative;
+- legacy/unmigrated instruction files are migration inputs, not instructions;
+- files under `.agents/local/**` may be written as migration output but must not be followed as instructions yet;
+- root `TASKS.md` is outside this instruction-migration block and must not be migrated or edited here.
 
 ## Task contract
 
