@@ -19,7 +19,19 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 ## Active task index
 
-_No non-terminal tasks are currently defined._
+| Task | State | Dependencies | Title | Summary |
+|---|---|---|---|---|
+| [`FL-TASKS-A-010`](tasks/FL-TASKS-A/FL-TASKS-A-010.md) | `QUEUED` | — | Define legacy task migration map | Account for every legacy `TASKS.md` section/task and lock the semantic conversion/archive rules before moving state. |
+| [`FL-TASKS-A-020`](tasks/FL-TASKS-A/FL-TASKS-A-020.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate roadmap and working-product gate context | Move non-executable product-roadmap/gate context out of the legacy mixed ledger into the baseline initiative model. |
+| [`FL-TASKS-A-030`](tasks/FL-TASKS-A/FL-TASKS-A-030.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate human-owned HUMANS.md work | Preserve legacy `FL-H001` as explicit human-owned non-agent future intent rather than executable agent work. |
+| [`FL-TASKS-A-040`](tasks/FL-TASKS-A/FL-TASKS-A-040.md) | `QUEUED` | `FL-TASKS-A-010` | Archive completed legacy product tasks | Preserve completed Phase A and B100–B140 task identities, outcomes, and acceptance evidence in task history without polluting the active ledger. |
+| [`FL-TASKS-A-050`](tasks/FL-TASKS-A/FL-TASKS-A-050.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate unfinished Phase B tasks | Create baseline task specs for B150–B190, with B150 explicitly `FROZEN` and later Phase B tasks `QUEUED` but undispatched. |
+| [`FL-TASKS-A-060`](tasks/FL-TASKS-A/FL-TASKS-A-060.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate Phase C Rider MVP tasks | Create baseline task specs for C200–C260 while preserving the working-product-gate semantics and avoiding invented authorization. |
+| [`FL-TASKS-A-070`](tasks/FL-TASKS-A/FL-TASKS-A-070.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate deferred Phase D tasks | Create baseline task specs for D300–D360 as `FROZEN` post-product-gate work. |
+| [`FL-TASKS-A-080`](tasks/FL-TASKS-A/FL-TASKS-A-080.md) | `QUEUED` | `FL-TASKS-A-020` | Migrate explicitly unscheduled intent | Preserve licensing timing and product non-goal boundaries as reminders/initiative context rather than executable tasks. |
+| [`FL-TASKS-A-090`](tasks/FL-TASKS-A/FL-TASKS-A-090.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate repository-standardization draft | Move S1–S10 into a structured non-executable initiative without promoting any item to Dispatch. |
+| [`FL-TASKS-A-100`](tasks/FL-TASKS-A/FL-TASKS-A-100.md) | `QUEUED` | `FL-TASKS-A-030`, `FL-TASKS-A-040`, `FL-TASKS-A-050`, `FL-TASKS-A-060`, `FL-TASKS-A-070`, `FL-TASKS-A-080`, `FL-TASKS-A-090` | Update task-system references and enforcement | Redirect current docs/policy/checks from root `TASKS.md` to the baseline control plane and remove transitional legacy-ledger assumptions. |
+| [`FL-TASKS-A-110`](tasks/FL-TASKS-A/FL-TASKS-A-110.md) | `QUEUED` | `FL-TASKS-A-100` | Retire legacy TASKS.md and validate cutover | Delete the legacy root ledger only after semantic coverage is proven, validate the new task model, and archive the migration block per the established convention. |
 
 ## Completed tasks
 
