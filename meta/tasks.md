@@ -16,7 +16,7 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-TASKS-A-070` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:31` | Authorized through FL-TASKS-A-110; migrating frozen post-gate Phase D work. |
+| `FL-TASKS-A-080` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:37` | Authorized through FL-TASKS-A-110; migrating unscheduled future intent. |
 
 ## Active task index
 
@@ -34,8 +34,14 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 | [`FL-C240`](tasks/FL-C240.md) | `QUEUED` | `FL-C230` | Add source navigation | Navigate roots/nodes/edges to trustworthy source locations. |
 | [`FL-C250`](tasks/FL-C250.md) | `QUEUED` | `FL-C220`, `FL-C230`, `FL-C240` | Add provenance, filtering, and basic control state | Expose evidence quality, filtering, and restart/cancel controls. |
 | [`FL-C260`](tasks/FL-C260.md) | `QUEUED` | `FL-B190`, `FL-C220`, `FL-C230`, `FL-C240`, `FL-C250` | Pass the working-product gate | Prove the complete supported Rider workflow on RSS2 and Wiremod. |
-| [`FL-TASKS-A-070`](tasks/FL-TASKS-A/FL-TASKS-A-070.md) | `IN_PROGRESS` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate deferred Phase D tasks | Create baseline task specs for D300–D360 as `FROZEN` post-product-gate work. |
-| [`FL-TASKS-A-080`](tasks/FL-TASKS-A/FL-TASKS-A-080.md) | `QUEUED` | `FL-TASKS-A-020` | Migrate explicitly unscheduled intent | Preserve licensing timing and product non-goal boundaries as reminders/initiative context rather than executable tasks. |
+| [`FL-D300`](tasks/FL-D300.md) | `FROZEN` | `FL-C260` | Add durable/incremental cache invalidation | Post-gate performance/correctness hardening. |
+| [`FL-D310`](tasks/FL-D310.md) | `FROZEN` | `FL-C260` | Add SML native-hook root discovery | Post-gate SML native-hook enrichment. |
+| [`FL-D320`](tasks/FL-D320.md) | `FROZEN` | `FL-C260` | Add UHT/reflection metadata ingestion | Post-gate reflection/generated metadata enrichment. |
+| [`FL-D330`](tasks/FL-D330.md) | `FROZEN` | `FL-C260` | Investigate Blueprint/generated-class enrichment | Post-gate scoped Blueprint/generated-class research. |
+| [`FL-D340`](tasks/FL-D340.md) | `FROZEN` | `FL-C260` | Reassess generic C++ / non-Satisfactory extraction | Post-gate extraction based on demonstrated reuse. |
+| [`FL-D350`](tasks/FL-D350.md) | `FROZEN` | `FL-C260` | Product packaging, compatibility policy, and installation UX | Post-gate distribution/compatibility work. |
+| [`FL-D360`](tasks/FL-D360.md) | `FROZEN` | `FL-C260` | Release documentation and public-facing polish | Post-gate release polish. |
+| [`FL-TASKS-A-080`](tasks/FL-TASKS-A/FL-TASKS-A-080.md) | `IN_PROGRESS` | `FL-TASKS-A-020` | Migrate explicitly unscheduled intent | Preserve licensing timing and product non-goal boundaries as reminders/initiative context rather than executable tasks. |
 | [`FL-TASKS-A-090`](tasks/FL-TASKS-A/FL-TASKS-A-090.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate repository-standardization draft | Move S1–S10 into a structured non-executable initiative without promoting any item to Dispatch. |
 | [`FL-TASKS-A-100`](tasks/FL-TASKS-A/FL-TASKS-A-100.md) | `QUEUED` | `FL-TASKS-A-030`, `FL-TASKS-A-040`, `FL-TASKS-A-050`, `FL-TASKS-A-060`, `FL-TASKS-A-070`, `FL-TASKS-A-080`, `FL-TASKS-A-090` | Update task-system references and enforcement | Redirect current docs/policy/checks from root `TASKS.md` to the baseline control plane and remove transitional legacy-ledger assumptions. |
 | [`FL-TASKS-A-110`](tasks/FL-TASKS-A/FL-TASKS-A-110.md) | `QUEUED` | `FL-TASKS-A-100` | Retire legacy TASKS.md and validate cutover | Delete the legacy root ledger only after semantic coverage is proven, validate the new task model, and archive the migration block per the established convention. |
