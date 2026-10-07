@@ -16,12 +16,13 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
+| `FL-TASKS-A-010` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 03:55` | Authorized through FL-TASKS-A-110. |
 
 ## Active task index
 
 | Task | State | Dependencies | Title | Summary |
 |---|---|---|---|---|
-| [`FL-TASKS-A-010`](tasks/FL-TASKS-A/FL-TASKS-A-010.md) | `QUEUED` | — | Define legacy task migration map | Account for every legacy `TASKS.md` section/task and lock the semantic conversion/archive rules before moving state. |
+| [`FL-TASKS-A-010`](tasks/FL-TASKS-A/FL-TASKS-A-010.md) | `IN_PROGRESS` | — | Define legacy task migration map | Account for every legacy `TASKS.md` section/task and lock the semantic conversion/archive rules before moving state. |
 | [`FL-TASKS-A-020`](tasks/FL-TASKS-A/FL-TASKS-A-020.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate roadmap and working-product gate context | Move non-executable product-roadmap/gate context out of the legacy mixed ledger into the baseline initiative model. |
 | [`FL-TASKS-A-030`](tasks/FL-TASKS-A/FL-TASKS-A-030.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate human-owned HUMANS.md work | Preserve legacy `FL-H001` as explicit human-owned non-agent future intent rather than executable agent work. |
 | [`FL-TASKS-A-040`](tasks/FL-TASKS-A/FL-TASKS-A-040.md) | `QUEUED` | `FL-TASKS-A-010` | Archive completed legacy product tasks | Preserve completed Phase A and B100–B140 task identities, outcomes, and acceptance evidence in task history without polluting the active ledger. |
