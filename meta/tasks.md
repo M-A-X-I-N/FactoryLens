@@ -16,7 +16,7 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-TASKS-A-080` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:37` | Authorized through FL-TASKS-A-110; migrating unscheduled future intent. |
+| `FL-TASKS-A-090` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:42` | Authorized through FL-TASKS-A-110; migrating repository-standardization draft. |
 
 ## Active task index
 
@@ -41,8 +41,7 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 | [`FL-D340`](tasks/FL-D340.md) | `FROZEN` | `FL-C260` | Reassess generic C++ / non-Satisfactory extraction | Post-gate extraction based on demonstrated reuse. |
 | [`FL-D350`](tasks/FL-D350.md) | `FROZEN` | `FL-C260` | Product packaging, compatibility policy, and installation UX | Post-gate distribution/compatibility work. |
 | [`FL-D360`](tasks/FL-D360.md) | `FROZEN` | `FL-C260` | Release documentation and public-facing polish | Post-gate release polish. |
-| [`FL-TASKS-A-080`](tasks/FL-TASKS-A/FL-TASKS-A-080.md) | `IN_PROGRESS` | `FL-TASKS-A-020` | Migrate explicitly unscheduled intent | Preserve licensing timing and product non-goal boundaries as reminders/initiative context rather than executable tasks. |
-| [`FL-TASKS-A-090`](tasks/FL-TASKS-A/FL-TASKS-A-090.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate repository-standardization draft | Move S1–S10 into a structured non-executable initiative without promoting any item to Dispatch. |
+| [`FL-TASKS-A-090`](tasks/FL-TASKS-A/FL-TASKS-A-090.md) | `IN_PROGRESS` | `FL-TASKS-A-010` | Migrate repository-standardization draft | Move S1–S10 into a structured non-executable initiative without promoting any item to Dispatch. |
 | [`FL-TASKS-A-100`](tasks/FL-TASKS-A/FL-TASKS-A-100.md) | `QUEUED` | `FL-TASKS-A-030`, `FL-TASKS-A-040`, `FL-TASKS-A-050`, `FL-TASKS-A-060`, `FL-TASKS-A-070`, `FL-TASKS-A-080`, `FL-TASKS-A-090` | Update task-system references and enforcement | Redirect current docs/policy/checks from root `TASKS.md` to the baseline control plane and remove transitional legacy-ledger assumptions. |
 | [`FL-TASKS-A-110`](tasks/FL-TASKS-A/FL-TASKS-A-110.md) | `QUEUED` | `FL-TASKS-A-100` | Retire legacy TASKS.md and validate cutover | Delete the legacy root ledger only after semantic coverage is proven, validate the new task model, and archive the migration block per the established convention. |
 

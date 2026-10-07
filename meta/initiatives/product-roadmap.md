@@ -60,6 +60,20 @@ The migrated B1–B8 feasibility work proves that the semantic direction is viab
 
 Supported-product task acceptance must use supported FactoryLens code and record limitations honestly rather than treating partial semantic evidence as complete coverage.
 
+## Explicit non-prerequisites for the working-product gate
+
+None of the following should become an accidental prerequisite for `FL-C260` unless the human deliberately changes scope:
+
+- perfect incoming-call / reverse-reference completeness;
+- deep Blueprint graph reconstruction;
+- universal Unreal-project support;
+- universal generic-C++ support;
+- support for IDEs other than Rider;
+- a public third-party adapter SDK;
+- polished graph visualization beyond what the first usable navigation workflow needs.
+
+These are product-boundary constraints, not hidden tasks.
+
 ## Promotion / closure criteria
 
 This initiative remains useful until the working-product gate is passed and the post-gate roadmap is deliberately reconsidered.
