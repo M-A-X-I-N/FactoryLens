@@ -1,22 +1,37 @@
-# 1. Persisted agent context
+# Agent instruction and memory router
 
-This directory contains agent-specific procedure and recovery guidance for FactoryLens. It is not a second technical documentation tree.
+This file is part of the generic agent baseline. Repository-specific routing belongs in [`local/README.md`](local/README.md), not here.
 
-## 1.1 What belongs here
+This directory separates **normative instructions** from **repository memory**:
 
-Good candidates include checkpoint/recovery conventions, fresh-session reading order, workspace/history safety, and navigation guidance for agents.
+- [`baseline/`](baseline/) contains generic instructions shared across repositories.
+- [`local/`](local/) contains repository-specific normative instructions and its own local router.
+- [`memory/`](memory/) contains repository-specific knowledge, rationale, investigations, decisions, and scar tissue. Memory is not policy and is read only when relevant.
 
-Do not put task lists here: the canonical global roadmap is `../TASKS.md`. Also keep technical architecture in `docs/`, experiment evidence in `research/`, generated output out of Git, machine-local configuration in `.env`, and private chat history out of the repository.
+Applicable local instructions explicitly override conflicting baseline instructions. Silence in local policy leaves the baseline rule in force.
 
-## 1.2 Fresh-session reading order
+Do not preload this entire directory.
 
-For substantive work:
+## Generic read routing
 
-1. `../AGENTS.md`
-2. `WORKFLOW.md`
-3. `../README.md`
-4. `../TASKS.md`
-5. `../docs/README.md`
-6. relevant material under `../research/`
+| Situation | Read |
+|---|---|
+| substantial repository work | [`baseline/WORKFLOW.md`](baseline/WORKFLOW.md) + [`local/README.md`](local/README.md) |
+| taskification, task authorization/state, claims, or recovery | [`baseline/WORKFLOW.md`](baseline/WORKFLOW.md) + local task routing from [`local/README.md`](local/README.md) |
+| branch/history/checkpoint/commit operation | [`baseline/GIT.md`](baseline/GIT.md) |
+| wholly agent-authored substantive commit | [`baseline/PROVENANCE.md`](baseline/PROVENANCE.md) |
+| deciding where learned information belongs | [`baseline/KNOWLEDGE.md`](baseline/KNOWLEDGE.md) |
+| baseline comparison, update, or legacy-repository adoption | [`baseline/MAINTENANCE.md`](baseline/MAINTENANCE.md) + [`local/README.md`](local/README.md) |
+| repository-specific policy or an unfamiliar local concern | [`local/README.md`](local/README.md) |
+| technical/rationale/history lookup | only relevant file(s) under `memory/`, using local routing/search as needed |
+| durable project architecture/policy | applicable human-facing documentation identified by the repository |
 
-The migrated B1-B8 feasibility study lives under `research/external-call-map-feasibility/`. Treat it as historical evidence for what was proven, not as the permanent supported product layout.
+For a tiny isolated edit, do not load unrelated instruction files merely for ceremony. If the work expands into task-governed, Git-sensitive, provenance-sensitive, repository-policy-sensitive, or knowledge-management work, load the relevant instructions before performing that part.
+
+## Ownership rule
+
+This baseline router must not enumerate repository-specific instruction filenames beyond the stable local entry point `local/README.md`, repository-specific task/control paths, or repository-specific memory categories.
+
+A repository may add arbitrary local instruction files without changing this file. Register their purpose/read trigger in `local/README.md`.
+
+Current tracked repository state remains authoritative over remembered conversation context.

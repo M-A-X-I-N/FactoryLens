@@ -1,65 +1,15 @@
-# 1. FactoryLens agent guide
+# Agent operating guide
 
-FactoryLens is a **Satisfactory-first developer-tooling project** with Rider as the planned primary frontend. Reuse and generalization are welcome where they are cheap, but they must not drive unnecessary abstraction or weaken the Satisfactory use case.
+Tracked repository state and durable repository documentation are authoritative over remembered conversation context.
 
-## 1.1 Before substantive work
+For substantial repository work:
 
-Read, in order:
+1. read [`.agents/README.md`](.agents/README.md) for instruction/memory routing;
+2. follow applicable generic instructions under `.agents/baseline/`;
+3. read [`.agents/local/README.md`](.agents/local/README.md) and the repository-specific instructions it routes to;
+4. inspect [`meta/tasks.md`](meta/tasks.md), Dispatch, and the linked task specification before planned task work unless the human redirects work;
+5. read only task-relevant memory, workspaces, and human-facing documentation.
 
-1. this file;
-2. `.agents/README.md` and `.agents/WORKFLOW.md`;
-3. the root `README.md`;
-4. `TASKS.md` for global priorities/status;
-5. `docs/README.md`;
-6. only the research material relevant to the task.
+Applicable repository-local instructions explicitly override conflicting baseline instructions. Silence in local policy leaves the baseline rule in force.
 
-Treat current repository state as authoritative over remembered chat context.
-
-## 1.2 Repository ownership
-
-- `docs/` owns durable architecture, setup, policy, and supported behavior.
-- `research/` owns experiments, evidence, feasibility studies, and historical probes.
-- generated compile databases, clangd indexes, logs, graph output, caches, and scratch state belong under ignored `work/`;
-- machine-local paths belong in ignored `.env`;
-- `TASKS.md` is the canonical repository-level roadmap/task ledger. Do not create competing TODO/task ledgers elsewhere; use chat for temporary substeps beneath the active global task.
-
-Supported product code should eventually live outside `research/`; promotion from a research probe is an explicit decision.
-
-## 1.3 Architecture discipline
-
-Prefer existing UnrealBuildTool, Clang/clangd, Unreal, and SML machinery over bespoke parsing.
-
-Keep responsibilities separated unless evidence justifies merging them:
-
-```text
-UBT compile truth
-  -> semantic backend
-     -> framework-entry adapters
-        -> graph/model layer
-           -> Rider frontend
-```
-
-Rider should initially be a frontend/host rather than the sole semantic source of truth.
-
-## 1.4 Safety and recoverability
-
-Preserve Git history and recoverability. Prefer small coherent commits and additive corrections over rewriting established history.
-
-Analysis of external Satisfactory/SML/UE projects is read-only by default. Do not modify target projects or dependency source merely to make analysis easier unless explicitly authorized.
-
-## 1.5 Commit messages
-
-Use:
-
-```text
-[Kind][Scope] Imperative summary
-```
-
-Approved kinds are `Feature`, `Fix`, `Research`, `Documentation`, `Test`, `CI`, `Build`, `Refactor`, `Chore`, and human-selected-only `CBA`.
-
-For wholly authored commits from this ChatGPT lineage, use exactly:
-
-```text
-Agent-authored-by: Gippity, Cartographer of Questionable Call Stacks
-  (OpenAI ChatGPT, GPT-5.6 Sol)
-```
+Files under `.agents/memory/` are knowledge, not instructions merely because they exist.
