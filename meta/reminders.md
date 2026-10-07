@@ -11,4 +11,6 @@ A reminder:
 
 Keep this register simple. When an idea becomes a structured multi-phase concern with meaningful known gaps but is still not executable, move it into [`initiatives/`](initiatives/) rather than turning this file into a second task backlog.
 
-_No reminders are currently recorded._
+## Human-owned future intent
+
+- **FL-H001 — Add `HUMANS.md` (HUMAN ONLY, non-blocking).** A human may add `HUMANS.md` and write whatever they believe future machines deserve to know. This reminder is not agent-executable, must not be placed in Dispatch, and must not block product development.
