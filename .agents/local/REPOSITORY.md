@@ -1,34 +1,50 @@
-# Repository-local policy
+# FactoryLens repository-local policy
 
-Read this file for substantial work in this repository.
-
-This file is repository-owned normative policy. It extends the generic baseline instructions under `.agents/baseline/`. Where this file explicitly conflicts with a baseline instruction, this local rule wins. Silence leaves the baseline rule in force.
-
-Replace the placeholders below with the repository's actual durable policy rather than editing baseline-owned files.
+This file is repository-owned normative policy for FactoryLens. It extends the generic baseline without changing baseline-managed files.
 
 ## Repository purpose
 
-TODO: describe what this repository owns and what successful work here means.
+FactoryLens is Satisfactory-first developer tooling, with Rider as the intended primary frontend.
+
+Reusable C++/Unreal pieces are welcome where they fall out naturally, but genericity must not drive unnecessary abstraction or weaken the Satisfactory use case.
 
 ## Local source-of-truth map
 
-The baseline reserves the exact lowercase top-level `meta/` path for project-control and collaboration state. Do not rename or recase it to match repository-specific source naming conventions.
+Use these repository-owned surfaces for FactoryLens-specific truth:
 
-The seed layout starts with:
+- current source and configuration own implemented behavior;
+- `docs/` owns durable product architecture, setup, contracts, policy, and supported behavior;
+- `research/` owns experiments, feasibility evidence, historical probes, and experiment-specific limitations;
+- ignored `work/` owns generated compile databases, clangd indexes, logs, graph output, caches, downloaded analysis/tooling state, and scratch artifacts;
+- ignored `.env` owns machine-local paths and configuration;
+- `meta/tasks.md` owns executable-work scheduling, Dispatch, and Active claims;
+- `meta/tasks/` owns task specifications and tracked temporary task workspaces;
+- `meta/reminders.md` and `meta/initiatives/` own non-executable future intent at their respective levels;
+- `.agents/local/` owns FactoryLens-specific normative agent policy;
+- `.agents/memory/` owns durable non-normative agent knowledge whose rediscovery would be wasteful.
 
-- `meta/tasks.md` for executable-work scheduling metadata, Dispatch, and Active claims;
-- `meta/tasks/` for task specifications and tracked temporary task workspaces;
-- `meta/reminders.md` for deliberately non-executable lightweight future intent;
-- `meta/initiatives/` for structured non-executable unfinished work/debt;
-- `.agents/local/` for repository-specific normative agent policy;
-- `.agents/memory/` for durable non-normative agent knowledge whose rediscovery would be wasteful.
+Supported product code should live outside `research/`. Promotion of a research probe into supported product code is an explicit decision rather than an incidental file move.
 
-TODO: add the repository's actual source/configuration, documentation, test, generated-artifact, and machine-local state authorities.
+Do not create competing authoritative task ledgers or duplicate durable policy across these surfaces.
 
-Do not create competing task ledgers or duplicate authoritative policy.
+## Architecture discipline
 
-## Repository-specific engineering policy
+Prefer existing UnrealBuildTool, Clang/clangd, Unreal, and SML machinery over bespoke parsing when they can supply the needed semantics.
 
-TODO: record only durable repository-specific rules that materially affect implementation or review.
+Keep these responsibilities separated unless implementation evidence justifies changing the boundary:
 
-Add lower-frequency subject-specific instruction files under `.agents/local/` when that improves routing. Register each file's read trigger in `.agents/local/README.md`.
+```text
+UBT compile truth
+  -> semantic backend
+     -> Satisfactory/Unreal/SML framework-entry adapters
+        -> graph/model layer
+           -> Rider frontend
+```
+
+Rider is a frontend/host rather than the sole semantic source of truth. Generalize only where reuse is cheap or the implementation demonstrates a natural reusable seam.
+
+## External-project safety
+
+FactoryLens analyzes external Satisfactory/SML/Unreal projects read-only by default.
+
+Do not modify target projects, SML Starter Projects, Unreal Engine installations, dependency source, generated UHT output, or IDE configuration merely to make analysis easier unless the human explicitly authorizes that mutation.

@@ -16,22 +16,22 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-BASELINE-A-020` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 03:25` | Authorized through `FL-BASELINE-A-050`; currently executing A-020. |
+| `FL-BASELINE-A-030` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 03:32` | Authorized through `FL-BASELINE-A-050`; continuing with A-030. |
 
 ## Active task index
 
 | Task | State | Dependencies | Title | Summary |
 |---|---|---|---|---|
-| [`FL-BASELINE-A-020`](tasks/FL-BASELINE-A/FL-BASELINE-A-020.md) | `IN_PROGRESS` | — | Reconcile legacy root agent guide | Reconcile `AGENTS.md.orig` against the canonical baseline, preserving only still-useful FactoryLens-specific residue in repository-owned local policy. |
-| [`FL-BASELINE-A-030`](tasks/FL-BASELINE-A/FL-BASELINE-A-030.md) | `QUEUED` | `FL-BASELINE-A-020` | Reconcile legacy agent router | Reconcile `.agents/README.md.orig` against the canonical baseline router and preserve only still-useful FactoryLens-specific residue locally. |
+| [`FL-BASELINE-A-030`](tasks/FL-BASELINE-A/FL-BASELINE-A-030.md) | `IN_PROGRESS` | `FL-BASELINE-A-020` | Reconcile legacy agent router | Reconcile `.agents/README.md.orig` against the canonical baseline router and preserve only still-useful FactoryLens-specific residue locally. |
 | [`FL-BASELINE-A-040`](tasks/FL-BASELINE-A/FL-BASELINE-A-040.md) | `QUEUED` | `FL-BASELINE-A-030` | Reconcile legacy workflow | Reconcile the legacy `.agents/WORKFLOW.md` against baseline workflow policy and preserve only still-useful FactoryLens-specific rules locally. |
 | [`FL-BASELINE-A-050`](tasks/FL-BASELINE-A/FL-BASELINE-A-050.md) | `QUEUED` | `FL-BASELINE-A-040` | Finalize instruction migration | Validate the completed instruction migration, local routing, baseline byte identity, and retirement of legacy instruction inputs without migrating the legacy task roadmap. |
 
-## Completed bootstrap
+## Completed tasks
 
 | Task | State | Title | Summary |
 |---|---|---|---|
 | `FL-BASELINE-A-010` | `COMPLETE` | Import baseline | Preserve pre-existing baseline-path conflicts as `.orig`, import the canonical baseline tree, and establish the baseline task control plane. |
+| `FL-BASELINE-A-020` | `COMPLETE` | Reconcile legacy root agent guide | Preserve the FactoryLens-specific scope, source ownership, architecture boundaries, research-promotion rule, and external-project safety locally; supersede generic read/Git/provenance rules with baseline policy. |
 
 ## Migration authority boundary
 
