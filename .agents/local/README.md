@@ -12,7 +12,9 @@ It owns the repository-specific identity, source-of-truth map, engineering conve
 
 ## Subject-triggered local policy
 
-Add repository-specific instruction files and their read triggers here as they become necessary.
+| Situation | Read |
+|---|---|
+| creating or asking the human to run repository validation/tooling | [`VALIDATION.md`](VALIDATION.md) |
 
 Do not create local instruction files merely to mirror baseline filenames.
 

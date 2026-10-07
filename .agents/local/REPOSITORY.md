@@ -13,6 +13,7 @@ Reusable C++/Unreal pieces are welcome where they fall out naturally, but generi
 Use these repository-owned surfaces for FactoryLens-specific truth:
 
 - current source and configuration own implemented behavior;
+- root `README.md` owns product identity and current high-level status;
 - `docs/` owns durable product architecture, setup, contracts, policy, and supported behavior;
 - `research/` owns experiments, feasibility evidence, historical probes, and experiment-specific limitations; the migrated B1–B8 External Call Map study under `research/external-call-map-feasibility/` is historical feasibility evidence, not the supported product layout;
 - ignored `work/` owns generated compile databases, clangd indexes, logs, graph output, caches, downloaded analysis/tooling state, and scratch artifacts;
@@ -41,7 +42,9 @@ UBT compile truth
            -> Rider frontend
 ```
 
-Rider is a frontend/host rather than the sole semantic source of truth. Generalize only where reuse is cheap or the implementation demonstrates a natural reusable seam.
+Rider is a frontend/host rather than the sole semantic source of truth. Do not make Rider UI code responsible for compiler semantics, and do not make framework rules parse arbitrary C++. Generalize only where reuse is cheap or the implementation demonstrates a natural reusable seam.
+
+Supported FactoryLens code should expose explicit interfaces, tests, error handling, and compatibility behavior appropriate to its supported role rather than retaining research-probe assumptions.
 
 ## External-project safety
 

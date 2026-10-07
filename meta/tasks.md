@@ -16,14 +16,13 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-BASELINE-A-040` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 03:36` | Authorized through `FL-BASELINE-A-050`; continuing with A-040. |
+| `FL-BASELINE-A-050` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 03:42` | Authorized through `FL-BASELINE-A-050`; performing final instruction-migration integration and validation. |
 
 ## Active task index
 
 | Task | State | Dependencies | Title | Summary |
 |---|---|---|---|---|
-| [`FL-BASELINE-A-040`](tasks/FL-BASELINE-A/FL-BASELINE-A-040.md) | `IN_PROGRESS` | `FL-BASELINE-A-030` | Reconcile legacy workflow | Reconcile the legacy `.agents/WORKFLOW.md` against baseline workflow policy and preserve only still-useful FactoryLens-specific rules locally. |
-| [`FL-BASELINE-A-050`](tasks/FL-BASELINE-A/FL-BASELINE-A-050.md) | `QUEUED` | `FL-BASELINE-A-040` | Finalize instruction migration | Validate the completed instruction migration, local routing, baseline byte identity, and retirement of legacy instruction inputs without migrating the legacy task roadmap. |
+| [`FL-BASELINE-A-050`](tasks/FL-BASELINE-A/FL-BASELINE-A-050.md) | `IN_PROGRESS` | `FL-BASELINE-A-040` | Finalize instruction migration | Validate the completed instruction migration, local routing, baseline byte identity, and retirement of legacy instruction inputs without migrating the legacy task roadmap. |
 
 ## Completed tasks
 
@@ -32,6 +31,7 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 | `FL-BASELINE-A-010` | `COMPLETE` | Import baseline | Preserve pre-existing baseline-path conflicts as `.orig`, import the canonical baseline tree, and establish the baseline task control plane. |
 | `FL-BASELINE-A-020` | `COMPLETE` | Reconcile legacy root agent guide | Preserve the FactoryLens-specific scope, source ownership, architecture boundaries, research-promotion rule, and external-project safety locally; supersede generic read/Git/provenance rules with baseline policy. |
 | `FL-BASELINE-A-030` | `COMPLETE` | Reconcile legacy agent router | Supersede generic agent-directory/read-order guidance with the baseline router and retain the B1–B8 feasibility study's historical-evidence role in repository-local policy. |
+| `FL-BASELINE-A-040` | `COMPLETE` | Reconcile legacy workflow | Supersede generic checkpoint/recovery/provenance policy with baseline rules; preserve FactoryLens analyzer boundaries and human-run validation-script rules in local policy. |
 
 ## Migration authority boundary
 
