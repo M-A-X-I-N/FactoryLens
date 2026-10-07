@@ -19,6 +19,7 @@ Use these repository-owned surfaces for FactoryLens-specific truth:
 - ignored `work/` owns generated compile databases, clangd indexes, logs, graph output, caches, downloaded analysis/tooling state, and scratch artifacts;
 - ignored `.env` owns machine-local paths and configuration;
 - `meta/tasks.md` owns executable-work scheduling, Dispatch, and Active claims;
+- root `TASKS.md` is retained only as non-authoritative legacy roadmap input pending a separate task-system migration; do not execute, schedule, or update work from it;
 - `meta/tasks/` owns task specifications and tracked temporary task workspaces;
 - `meta/reminders.md` and `meta/initiatives/` own non-executable future intent at their respective levels;
 - `.agents/local/` owns FactoryLens-specific normative agent policy;

@@ -11,7 +11,20 @@ REQUIRED_PATHS = (
     Path("AGENTS.md"),
     Path("TASKS.md"),
     Path(".agents/README.md"),
-    Path(".agents/WORKFLOW.md"),
+    Path(".agents/baseline/GIT.md"),
+    Path(".agents/baseline/KNOWLEDGE.md"),
+    Path(".agents/baseline/MAINTENANCE.md"),
+    Path(".agents/baseline/PROVENANCE.md"),
+    Path(".agents/baseline/WORKFLOW.md"),
+    Path(".agents/local/README.md"),
+    Path(".agents/local/REPOSITORY.md"),
+    Path(".agents/local/VALIDATION.md"),
+    Path(".agents/memory/README.md"),
+    Path("meta/README.md"),
+    Path("meta/tasks.md"),
+    Path("meta/tasks/README.md"),
+    Path("meta/reminders.md"),
+    Path("meta/initiatives/README.md"),
     Path("docs/README.md"),
     Path("docs/PRODUCT_SCOPE.md"),
     Path("docs/MVP_CONTRACT.md"),
@@ -44,6 +57,12 @@ FORBIDDEN_TASK_LEDGERS = (
     Path("docs/TASKS.md"),
 )
 
+FORBIDDEN_LEGACY_AGENT_PATHS = (
+    Path("AGENTS.md.orig"),
+    Path(".agents/README.md.orig"),
+    Path(".agents/WORKFLOW.md"),
+)
+
 
 def repository_root() -> Path:
     return Path(__file__).resolve().parents[1]
@@ -74,6 +93,12 @@ def collect_errors(root: Path) -> list[str]:
         if (root / path).exists():
             errors.append(
                 f"repository-local task ledger is not allowed: {path.as_posix()}"
+            )
+
+    for path in FORBIDDEN_LEGACY_AGENT_PATHS:
+        if (root / path).exists():
+            errors.append(
+                f"retired legacy agent instruction path still exists: {path.as_posix()}"
             )
 
     try:
