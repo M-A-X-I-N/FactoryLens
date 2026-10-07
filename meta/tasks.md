@@ -16,14 +16,13 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-TASKS-A-040` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:12` | Authorized through FL-TASKS-A-110; archiving completed legacy product tasks. |
+| `FL-TASKS-A-050` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:18` | Authorized through FL-TASKS-A-110; migrating unfinished Phase B tasks. |
 
 ## Active task index
 
 | Task | State | Dependencies | Title | Summary |
 |---|---|---|---|---|
-| [`FL-TASKS-A-040`](tasks/FL-TASKS-A/FL-TASKS-A-040.md) | `IN_PROGRESS` | `FL-TASKS-A-010` | Archive completed legacy product tasks | Preserve completed Phase A and B100–B140 task identities, outcomes, and acceptance evidence in task history without polluting the active ledger. |
-| [`FL-TASKS-A-050`](tasks/FL-TASKS-A/FL-TASKS-A-050.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate unfinished Phase B tasks | Create baseline task specs for B150–B190, with B150 explicitly `FROZEN` and later Phase B tasks `QUEUED` but undispatched. |
+| [`FL-TASKS-A-050`](tasks/FL-TASKS-A/FL-TASKS-A-050.md) | `IN_PROGRESS` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate unfinished Phase B tasks | Create baseline task specs for B150–B190, with B150 explicitly `FROZEN` and later Phase B tasks `QUEUED` but undispatched. |
 | [`FL-TASKS-A-060`](tasks/FL-TASKS-A/FL-TASKS-A-060.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate Phase C Rider MVP tasks | Create baseline task specs for C200–C260 while preserving the working-product-gate semantics and avoiding invented authorization. |
 | [`FL-TASKS-A-070`](tasks/FL-TASKS-A/FL-TASKS-A-070.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate deferred Phase D tasks | Create baseline task specs for D300–D360 as `FROZEN` post-product-gate work. |
 | [`FL-TASKS-A-080`](tasks/FL-TASKS-A/FL-TASKS-A-080.md) | `QUEUED` | `FL-TASKS-A-020` | Migrate explicitly unscheduled intent | Preserve licensing timing and product non-goal boundaries as reminders/initiative context rather than executable tasks. |
