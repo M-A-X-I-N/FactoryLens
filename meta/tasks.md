@@ -26,7 +26,7 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 | [`FL-B170`](tasks/FL-B170.md) | `QUEUED` | `FL-B150`, `FL-B160` | Add a headless developer CLI/integration harness | Exercise supported root discovery and expansion without Rider. |
 | [`FL-B180`](tasks/FL-B180.md) | `QUEUED` | `FL-B150`, `FL-B160` | Add automated analyzer tests and controlled semantic fixtures | Build deterministic supported analyzer coverage separate from expensive real-workspace checks. |
 | [`FL-B190`](tasks/FL-B190.md) | `QUEUED` | `FL-B150`, `FL-B160`, `FL-B170`, `FL-B180` | Validate the supported analyzer on RSS2 and Wiremod | Prove the supported analyzer across both required real Satisfactory mod specimens. |
-| [`FL-C200`](tasks/FL-C200.md) | `QUEUED` | `FL-B190` | Create the minimal Rider plugin skeleton | Establish the supported Rider-side entry surface after analyzer validation. |
+| [`FL-C200`](tasks/FL-C200.md) | `QUEUED` | `FL-B190` | Establish the minimal supported Rider entry surface | Turn the already-packaged Rider plugin shell into a supported project-aware entry surface after analyzer validation. |
 | [`FL-C210`](tasks/FL-C210.md) | `QUEUED` | `FL-C200` | Connect Rider project lifecycle to the analyzer lifecycle | Manage supported analyzer sessions predictably with Rider project lifetime. |
 | [`FL-C220`](tasks/FL-C220.md) | `QUEUED` | `FL-C210` | Add the framework-root explorer | Present useful framework roots with provenance without default override noise. |
 | [`FL-C230`](tasks/FL-C230.md) | `QUEUED` | `FL-C210` | Add lazy call-tree expansion | Present bounded cached graph traversal as lazy Rider navigation. |
