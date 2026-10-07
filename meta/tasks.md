@@ -16,14 +16,18 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-TASKS-A-050` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:18` | Authorized through FL-TASKS-A-110; migrating unfinished Phase B tasks. |
+| `FL-TASKS-A-060` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:25` | Authorized through FL-TASKS-A-110; migrating Phase C Rider MVP tasks. |
 
 ## Active task index
 
 | Task | State | Dependencies | Title | Summary |
 |---|---|---|---|---|
-| [`FL-TASKS-A-050`](tasks/FL-TASKS-A/FL-TASKS-A-050.md) | `IN_PROGRESS` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate unfinished Phase B tasks | Create baseline task specs for B150–B190, with B150 explicitly `FROZEN` and later Phase B tasks `QUEUED` but undispatched. |
-| [`FL-TASKS-A-060`](tasks/FL-TASKS-A/FL-TASKS-A-060.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate Phase C Rider MVP tasks | Create baseline task specs for C200–C260 while preserving the working-product-gate semantics and avoiding invented authorization. |
+| [`FL-B150`](tasks/FL-B150.md) | `FROZEN` | — | Implement the root-provider interface and external-override provider | Pre-migration active task; intentionally frozen by human decision after migration. |
+| [`FL-B160`](tasks/FL-B160.md) | `QUEUED` | `FL-B150` | Implement Unreal dynamic-delegate root discovery | Add semantically verified AddDynamic-style callback roots with registration provenance. |
+| [`FL-B170`](tasks/FL-B170.md) | `QUEUED` | `FL-B150`, `FL-B160` | Add a headless developer CLI/integration harness | Exercise supported root discovery and expansion without Rider. |
+| [`FL-B180`](tasks/FL-B180.md) | `QUEUED` | `FL-B150`, `FL-B160` | Add automated analyzer tests and controlled semantic fixtures | Build deterministic supported analyzer coverage separate from expensive real-workspace checks. |
+| [`FL-B190`](tasks/FL-B190.md) | `QUEUED` | `FL-B150`, `FL-B160`, `FL-B170`, `FL-B180` | Validate the supported analyzer on RSS2 and Wiremod | Prove the supported analyzer across both required real Satisfactory mod specimens. |
+| [`FL-TASKS-A-060`](tasks/FL-TASKS-A/FL-TASKS-A-060.md) | `IN_PROGRESS` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate Phase C Rider MVP tasks | Create baseline task specs for C200–C260 while preserving the working-product-gate semantics and avoiding invented authorization. |
 | [`FL-TASKS-A-070`](tasks/FL-TASKS-A/FL-TASKS-A-070.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate deferred Phase D tasks | Create baseline task specs for D300–D360 as `FROZEN` post-product-gate work. |
 | [`FL-TASKS-A-080`](tasks/FL-TASKS-A/FL-TASKS-A-080.md) | `QUEUED` | `FL-TASKS-A-020` | Migrate explicitly unscheduled intent | Preserve licensing timing and product non-goal boundaries as reminders/initiative context rather than executable tasks. |
 | [`FL-TASKS-A-090`](tasks/FL-TASKS-A/FL-TASKS-A-090.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate repository-standardization draft | Move S1–S10 into a structured non-executable initiative without promoting any item to Dispatch. |
