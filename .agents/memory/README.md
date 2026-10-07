@@ -9,3 +9,8 @@ Memory never overrides current baseline or local instructions merely because it 
 Do not preload this directory. Read only task-relevant memory.
 
 Do not create empty category directories for symmetry. Introduce categories when useful knowledge actually needs them, and prefer updating an existing note over creating competing memory.
+
+
+## Current memory notes
+
+- [`semantic-validation.md`](semantic-validation.md) — RSS2/clangd path canonicalization, cold-index behavior, Windows PowerShell validation traps, real override-symbol naming, and FL-B150 diagnostic scar tissue.
