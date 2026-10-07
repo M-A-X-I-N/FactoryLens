@@ -14,7 +14,7 @@ Use these repository-owned surfaces for FactoryLens-specific truth:
 
 - current source and configuration own implemented behavior;
 - `docs/` owns durable product architecture, setup, contracts, policy, and supported behavior;
-- `research/` owns experiments, feasibility evidence, historical probes, and experiment-specific limitations;
+- `research/` owns experiments, feasibility evidence, historical probes, and experiment-specific limitations; the migrated B1–B8 External Call Map study under `research/external-call-map-feasibility/` is historical feasibility evidence, not the supported product layout;
 - ignored `work/` owns generated compile databases, clangd indexes, logs, graph output, caches, downloaded analysis/tooling state, and scratch artifacts;
 - ignored `.env` owns machine-local paths and configuration;
 - `meta/tasks.md` owns executable-work scheduling, Dispatch, and Active claims;
