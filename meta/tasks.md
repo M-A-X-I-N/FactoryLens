@@ -16,7 +16,7 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-TASKS-A-060` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:25` | Authorized through FL-TASKS-A-110; migrating Phase C Rider MVP tasks. |
+| `FL-TASKS-A-070` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:31` | Authorized through FL-TASKS-A-110; migrating frozen post-gate Phase D work. |
 
 ## Active task index
 
@@ -27,8 +27,14 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 | [`FL-B170`](tasks/FL-B170.md) | `QUEUED` | `FL-B150`, `FL-B160` | Add a headless developer CLI/integration harness | Exercise supported root discovery and expansion without Rider. |
 | [`FL-B180`](tasks/FL-B180.md) | `QUEUED` | `FL-B150`, `FL-B160` | Add automated analyzer tests and controlled semantic fixtures | Build deterministic supported analyzer coverage separate from expensive real-workspace checks. |
 | [`FL-B190`](tasks/FL-B190.md) | `QUEUED` | `FL-B150`, `FL-B160`, `FL-B170`, `FL-B180` | Validate the supported analyzer on RSS2 and Wiremod | Prove the supported analyzer across both required real Satisfactory mod specimens. |
-| [`FL-TASKS-A-060`](tasks/FL-TASKS-A/FL-TASKS-A-060.md) | `IN_PROGRESS` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate Phase C Rider MVP tasks | Create baseline task specs for C200–C260 while preserving the working-product-gate semantics and avoiding invented authorization. |
-| [`FL-TASKS-A-070`](tasks/FL-TASKS-A/FL-TASKS-A-070.md) | `QUEUED` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate deferred Phase D tasks | Create baseline task specs for D300–D360 as `FROZEN` post-product-gate work. |
+| [`FL-C200`](tasks/FL-C200.md) | `QUEUED` | `FL-B190` | Create the minimal Rider plugin skeleton | Establish the supported Rider-side entry surface after analyzer validation. |
+| [`FL-C210`](tasks/FL-C210.md) | `QUEUED` | `FL-C200` | Connect Rider project lifecycle to the analyzer lifecycle | Manage supported analyzer sessions predictably with Rider project lifetime. |
+| [`FL-C220`](tasks/FL-C220.md) | `QUEUED` | `FL-C210` | Add the framework-root explorer | Present useful framework roots with provenance without default override noise. |
+| [`FL-C230`](tasks/FL-C230.md) | `QUEUED` | `FL-C210` | Add lazy call-tree expansion | Present bounded cached graph traversal as lazy Rider navigation. |
+| [`FL-C240`](tasks/FL-C240.md) | `QUEUED` | `FL-C230` | Add source navigation | Navigate roots/nodes/edges to trustworthy source locations. |
+| [`FL-C250`](tasks/FL-C250.md) | `QUEUED` | `FL-C220`, `FL-C230`, `FL-C240` | Add provenance, filtering, and basic control state | Expose evidence quality, filtering, and restart/cancel controls. |
+| [`FL-C260`](tasks/FL-C260.md) | `QUEUED` | `FL-B190`, `FL-C220`, `FL-C230`, `FL-C240`, `FL-C250` | Pass the working-product gate | Prove the complete supported Rider workflow on RSS2 and Wiremod. |
+| [`FL-TASKS-A-070`](tasks/FL-TASKS-A/FL-TASKS-A-070.md) | `IN_PROGRESS` | `FL-TASKS-A-010`, `FL-TASKS-A-020` | Migrate deferred Phase D tasks | Create baseline task specs for D300–D360 as `FROZEN` post-product-gate work. |
 | [`FL-TASKS-A-080`](tasks/FL-TASKS-A/FL-TASKS-A-080.md) | `QUEUED` | `FL-TASKS-A-020` | Migrate explicitly unscheduled intent | Preserve licensing timing and product non-goal boundaries as reminders/initiative context rather than executable tasks. |
 | [`FL-TASKS-A-090`](tasks/FL-TASKS-A/FL-TASKS-A-090.md) | `QUEUED` | `FL-TASKS-A-010` | Migrate repository-standardization draft | Move S1–S10 into a structured non-executable initiative without promoting any item to Dispatch. |
 | [`FL-TASKS-A-100`](tasks/FL-TASKS-A/FL-TASKS-A-100.md) | `QUEUED` | `FL-TASKS-A-030`, `FL-TASKS-A-040`, `FL-TASKS-A-050`, `FL-TASKS-A-060`, `FL-TASKS-A-070`, `FL-TASKS-A-080`, `FL-TASKS-A-090` | Update task-system references and enforcement | Redirect current docs/policy/checks from root `TASKS.md` to the baseline control plane and remove transitional legacy-ledger assumptions. |
