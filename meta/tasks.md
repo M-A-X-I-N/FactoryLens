@@ -16,7 +16,6 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 
 | Task | Lineage | Canonical branch | Claimed at (UTC) | Notes |
 |---|---|---|---|---|
-| `FL-TASKS-A-110` | `lyra_261007-025300` | `agent/lyra_261007-025300/main` | `2026-10-07 04:54` | Authorized through FL-TASKS-A-110; final legacy-ledger retirement and cutover validation. |
 
 ## Active task index
 
@@ -41,7 +40,6 @@ Claims are live coordination locks, not identity or recovery credentials. The ta
 | [`FL-D340`](tasks/FL-D340.md) | `FROZEN` | `FL-C260` | Reassess generic C++ / non-Satisfactory extraction | Post-gate extraction based on demonstrated reuse. |
 | [`FL-D350`](tasks/FL-D350.md) | `FROZEN` | `FL-C260` | Product packaging, compatibility policy, and installation UX | Post-gate distribution/compatibility work. |
 | [`FL-D360`](tasks/FL-D360.md) | `FROZEN` | `FL-C260` | Release documentation and public-facing polish | Post-gate release polish. |
-| [`FL-TASKS-A-110`](tasks/FL-TASKS-A/FL-TASKS-A-110.md) | `IN_PROGRESS` | `FL-TASKS-A-100` | Retire legacy TASKS.md and validate cutover | Delete the legacy root ledger only after semantic coverage is proven, validate the new task model, and archive the migration block per the established convention. |
 
 ## Completed tasks
 

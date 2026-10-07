@@ -19,3 +19,8 @@ Keep this register simple. When an idea becomes a structured multi-phase concern
 ## Product/release timing
 
 - **License selection / release-policy scheduling.** Keep this deliberately unscheduled until after `FL-C260` passes the working-product gate unless the human explicitly pulls it forward. This is future intent, not executable authorization.
+
+
+## Parked CI concerns
+
+- **Existing CI follow-up / cleanup / optimization work: not now.** Per current human direction, existing CI concerns belong on the deliberately parked “fuck them for now” shelf. Do not promote them into Dispatch or let them gate unrelated task migration/product work unless the human explicitly revisits CI.

@@ -51,6 +51,7 @@ REQUIRED_PATHS = (
 )
 
 FORBIDDEN_TASK_LEDGERS = (
+    Path("TASKS.md"),
     Path("TODO.md"),
     Path("docs/TODO.md"),
     Path("docs/TASKS.md"),
